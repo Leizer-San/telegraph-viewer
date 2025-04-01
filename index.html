@@ -67,7 +67,7 @@
         let currentIndex = 0;
 
         async function loadTelegraphContent(slug) {
-            const proxyUrl = "https://corsproxy.io/?";
+            const proxyUrl = "https://corsproxy.io/?url=";
             const url = `https://telegra.ph/${slug}`;
             try {
                 const response = await fetch(proxyUrl + url);
