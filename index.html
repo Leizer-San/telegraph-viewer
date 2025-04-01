@@ -8,7 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             max-width: 900px;
-            margin: 20px auto;
+            margin: 40px auto;
             background: #121212;
             color: #e0e0e0;
             line-height: 1.8;
@@ -40,8 +40,8 @@
             overflow: hidden;
         }
         .lightbox img {
-            max-width: 100%;
-            max-height: 100%;
+            max-width: 90%;
+            max-height: 90%;
         }
         .lightbox.show {
             visibility: visible;
@@ -67,7 +67,7 @@
         let currentIndex = 0;
 
         async function loadTelegraphContent(slug) {
-            const proxyUrl = "https://corsproxy.io/?url=";
+            const proxyUrl = "https://corsproxy.io/?";
             const url = `https://telegra.ph/${slug}`;
             try {
                 const response = await fetch(proxyUrl + url);
@@ -164,7 +164,12 @@
             }
         });
 
-        const slug = window.location.pathname.substring(1);
+        function getSlugFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.keys().next().value;
+        }
+
+        const slug = getSlugFromUrl();
         if (slug) loadTelegraphContent(slug);
     </script>
 </body>
