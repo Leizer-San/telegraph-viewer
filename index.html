@@ -68,7 +68,7 @@
 
         document.addEventListener("DOMContentLoaded", function() {
             const params = new URLSearchParams(window.location.search);
-            const slug = params.keys().next().value;
+            const slug = params.get(Object.keys(Object.fromEntries(params))[0]);
             
             if (!slug) {
                 document.getElementById("content").innerText = "Ошибка: не указан параметр страницы.";
