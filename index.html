@@ -65,6 +65,8 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             let slug = window.location.search.replace("?", "").trim();
+            console.log(window.location.search);
+            console.log(slug);
             
             if (!slug) {
                 document.getElementById("content").innerText = "Ошибка: не указан параметр страницы.";
