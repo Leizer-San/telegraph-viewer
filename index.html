@@ -63,19 +63,17 @@
     </div>
 
     <script>
-        let images = [];
-        let currentIndex = 0;
-
         document.addEventListener("DOMContentLoaded", function() {
-            const params = new URLSearchParams(window.location.search);
-            const slug = params.get(Object.keys(Object.fromEntries(params))[0]);
+            let slug = window.location.search.replace("?", "").trim();
             
             if (!slug) {
                 document.getElementById("content").innerText = "Ошибка: не указан параметр страницы.";
                 return;
             }
-            
+
             const url = `https://corsproxy.io/?url=https://telegra.ph/${slug}`;
+            console.log("Запрос к:", url);
+
             fetch(url)
                 .then(response => response.text())
                 .then(html => {
@@ -96,7 +94,7 @@
         });
 
         function setupImageClick() {
-            images = Array.from(document.querySelectorAll("#content img"));
+            let images = Array.from(document.querySelectorAll("img"));
             images.forEach((img, index) => {
                 img.dataset.index = index;
                 img.addEventListener("click", function() {
@@ -106,11 +104,11 @@
         }
 
         function openLightbox(index) {
-            currentIndex = index;
+            let images = Array.from(document.querySelectorAll("img"));
             const lightboxImg = document.getElementById("lightbox-img");
-            lightboxImg.src = images[currentIndex].src;
-            lightboxImg.dataset.index = currentIndex;
-            document.getElementById("counter").innerText = `${currentIndex + 1} / ${images.length}`;
+            lightboxImg.src = images[index].src;
+            lightboxImg.dataset.index = index;
+            document.getElementById("counter").innerText = `${index + 1} / ${images.length}`;
             document.getElementById("lightbox").classList.add("show");
             document.body.style.overflow = "hidden";
         }
@@ -121,16 +119,15 @@
         }
 
         function changeImage(direction) {
+            let images = Array.from(document.querySelectorAll("img"));
+            let currentIndex = parseInt(document.getElementById("lightbox-img").dataset.index);
             if ((direction === -1 && currentIndex > 0) || (direction === 1 && currentIndex < images.length - 1)) {
-                currentIndex += direction;
-                openLightbox(currentIndex);
+                openLightbox(currentIndex + direction);
             }
         }
 
         document.getElementById("lightbox").addEventListener("click", function(e) {
-            if (e.target.id === "lightbox") {
-                closeLightbox();
-            }
+            if (e.target.id === "lightbox") closeLightbox();
         });
 
         document.addEventListener("keydown", function(e) {
