@@ -67,7 +67,8 @@
         let currentIndex = 0;
 
         document.addEventListener("DOMContentLoaded", function() {
-            const slug = window.location.search.slice(1);
+            const params = new URLSearchParams(window.location.search);
+            const slug = params.keys().next().value;
             
             if (!slug) {
                 document.getElementById("content").innerText = "Ошибка: не указан параметр страницы.";
@@ -75,7 +76,6 @@
             }
             
             const url = `https://corsproxy.io/?url=https://telegra.ph/${slug}`;
-            console.log("Fetching URL:", url);
             fetch(url)
                 .then(response => response.text())
                 .then(html => {
