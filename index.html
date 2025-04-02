@@ -38,8 +38,8 @@
             overflow: hidden;
         }
         .lightbox img {
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 100%;
+            max-height: 100%;
         }
         .lightbox.show {
             visibility: visible;
@@ -68,7 +68,7 @@
     </div>
 
     <script>
-        let startX = 0;
+        let startX = 0, startY = 0;
         
         document.addEventListener("DOMContentLoaded", function() {
             let slug = window.location.search.replace("?", "").trim();
@@ -112,7 +112,9 @@
             lightboxImg.dataset.index = index;
             document.getElementById("counter").innerText = `${index + 1} из ${images.length}`;
             document.getElementById("lightbox").classList.add("show");
-            document.documentElement.requestFullscreen();
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            }
             document.body.style.overflow = "hidden";
         }
 
@@ -144,15 +146,25 @@
 
         document.getElementById("lightbox").addEventListener("touchstart", function(e) {
             startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
         });
 
         document.getElementById("lightbox").addEventListener("touchend", function(e) {
             let endX = e.changedTouches[0].clientX;
+            let endY = e.changedTouches[0].clientY;
             let diffX = endX - startX;
-            if (diffX > 50) {
-                changeImage(-1);
-            } else if (diffX < -50) {
-                changeImage(1);
+            let diffY = endY - startY;
+            
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                if (diffX > 50) {
+                    changeImage(-1);
+                } else if (diffX < -50) {
+                    changeImage(1);
+                }
+            } else {
+                if (diffY < -50) {
+                    closeLightbox();
+                }
             }
         });
     </script>
