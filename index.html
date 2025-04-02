@@ -45,16 +45,17 @@
             visibility: visible;
             opacity: 1;
         }
-        .counter {
+        .lightbox .counter {
             position: absolute;
             top: 10px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.7);
-            color: #fff;
-            font-size: 16px;
             padding: 5px 10px;
             border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
         }
     </style>
 </head>
@@ -95,20 +96,21 @@
         });
 
         function setupImageClick() {
-            let images = Array.from(document.querySelectorAll("article img"));
+            let images = Array.from(document.querySelectorAll("#content img"));
             images.forEach((img, index) => {
                 img.dataset.index = index;
                 img.addEventListener("click", function() {
-                    openLightbox(parseInt(this.dataset.index), images);
+                    openLightbox(index);
                 });
             });
         }
 
-        function openLightbox(index, images) {
+        function openLightbox(index) {
+            let images = Array.from(document.querySelectorAll("#content img"));
             const lightboxImg = document.getElementById("lightbox-img");
             lightboxImg.src = images[index].src;
             lightboxImg.dataset.index = index;
-            document.getElementById("counter").innerText = `${index + 1} із ${images.length}`;
+            document.getElementById("counter").innerText = `${index + 1} из ${images.length}`;
             document.getElementById("lightbox").classList.add("show");
             document.body.style.overflow = "hidden";
         }
@@ -118,8 +120,22 @@
             document.body.style.overflow = "auto";
         }
 
+        function changeImage(direction) {
+            let images = Array.from(document.querySelectorAll("#content img"));
+            let currentIndex = parseInt(document.getElementById("lightbox-img").dataset.index);
+            if ((direction === -1 && currentIndex > 0) || (direction === 1 && currentIndex < images.length - 1)) {
+                openLightbox(currentIndex + direction);
+            }
+        }
+
         document.getElementById("lightbox").addEventListener("click", function(e) {
             if (e.target.id === "lightbox") closeLightbox();
+        });
+
+        document.addEventListener("keydown", function(e) {
+            if (e.key === "Escape") closeLightbox();
+            if (e.key === "ArrowLeft") changeImage(-1);
+            if (e.key === "ArrowRight") changeImage(1);
         });
     </script>
 </body>
