@@ -67,9 +67,23 @@
          <img id="lightbox-img" src="" alt="" data-index="0">
          <div class="counter" id="counter"></div>
      </div>
- 
+
+     <script src="https://telegram.org/js/telegram-web-app.js"></script>
      <script>
          let startX = 0, startY = 0;
+         let tg      = window.Telegram;
+  
+         if(tg != undefined){
+           if (tg.WebApp != undefined && tg.WebApp.initData != undefined){
+            
+           let safe    = tg.WebApp.initData;
+           console.log(safe);
+           tg.WebApp.backgroundColor = '#3d3d3d';
+           tg.WebApp.headerColor = '#212121';
+           tg.WebApp.expand(); 
+       
+           }    
+         }
  
          document.addEventListener("DOMContentLoaded", function() {
              let slug = window.location.search.replace("?", "").trim();
