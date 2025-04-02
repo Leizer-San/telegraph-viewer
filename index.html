@@ -8,8 +8,8 @@
         body {
             font-family: Arial, sans-serif;
             max-width: 900px;
-            margin: 0 auto;
-            padding: 10px;
+            margin: 40px auto;
+            padding: 0;
             background: #121212;
             color: #e0e0e0;
             line-height: 1.8;
@@ -48,22 +48,26 @@
 </head>
 <body>
     <div id="content">Загрузка...</div>
+
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
         <img id="lightbox-img" src="" alt="">
     </div>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        
+        let startX = 0, startY = 0;
+
         document.addEventListener("DOMContentLoaded", function() {
-            let slug = window.location.search.substring(1); // Берем все после '?'
+            // Извлечение параметра slug из URL
+            let pathSegments = window.location.pathname.split('/');
+            let slug = pathSegments[pathSegments.length - 1]; // Получаем последний сегмент
+
             if (!slug) {
                 document.getElementById("content").innerText = "Ошибка: не указан параметр страницы.";
                 return;
             }
-            
+
             const url = `https://corsproxy.io/?url=https://telegra.ph/${slug}`;
+
             fetch(url)
                 .then(response => response.text())
                 .then(html => {
@@ -74,18 +78,18 @@
                     setupImageClick();
                 });
         });
-        
+
         function setupImageClick() {
             document.querySelectorAll("#content img").forEach(img => {
                 img.onclick = () => openLightbox(img.src);
             });
         }
-        
+
         function openLightbox(src) {
             document.getElementById("lightbox-img").src = src;
             document.getElementById("lightbox").classList.add("show");
         }
-        
+
         function closeLightbox() {
             document.getElementById("lightbox").classList.remove("show");
         }
