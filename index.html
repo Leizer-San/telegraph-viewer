@@ -40,7 +40,7 @@
         .lightbox img {
             max-width: 100%;
             max-height: 100%;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.5s ease;
         }
         .lightbox.show {
             visibility: visible;
@@ -129,16 +129,14 @@
         function openLightbox(index) {
             let images = Array.from(document.querySelectorAll("#content img"));
             const lightboxImg = document.getElementById("lightbox-img");
-            lightboxImg.src = images[index].src;
-            lightboxImg.dataset.index = index;
-            document.getElementById("counter").innerText = `${index + 1} из ${images.length}`;
-            lightboxImg.style.transform = "scale(0.8)";
+            
+            lightboxImg.style.opacity = 0; // Начальная непрозрачность для анимации
             setTimeout(() => {
                 lightboxImg.src = images[index].src;
                 lightboxImg.dataset.index = index;
                 document.getElementById("counter").innerText = `${index + 1} из ${images.length}`;
-                lightboxImg.style.transform = "scale(1)";
-            }, 100);
+                lightboxImg.style.opacity = 1; // Плавное появление изображения
+            }, 500); // Задержка перед сменой изображения для плавного перехода
             document.getElementById("lightbox").classList.add("show");
             images[index].scrollIntoView({ behavior: "smooth", block: "center" });
             if (document.documentElement.requestFullscreen) {
