@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Telegraph Viewer</title>
     <style>
         body {
@@ -68,6 +68,8 @@
     </div>
 
     <script>
+        let startX = 0;
+        
         document.addEventListener("DOMContentLoaded", function() {
             let slug = window.location.search.replace("?", "").trim();
             if (!slug) {
@@ -89,9 +91,6 @@
                     } else {
                         document.getElementById("content").innerText = "Статья не найдена.";
                     }
-                })
-                .catch(error => {
-                    document.getElementById("content").innerText = "Ошибка загрузки статьи.";
                 });
         });
 
@@ -113,11 +112,15 @@
             lightboxImg.dataset.index = index;
             document.getElementById("counter").innerText = `${index + 1} из ${images.length}`;
             document.getElementById("lightbox").classList.add("show");
+            document.documentElement.requestFullscreen();
             document.body.style.overflow = "hidden";
         }
 
         function closeLightbox() {
             document.getElementById("lightbox").classList.remove("show");
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
             document.body.style.overflow = "auto";
         }
 
@@ -137,6 +140,20 @@
             if (e.key === "Escape") closeLightbox();
             if (e.key === "ArrowLeft") changeImage(-1);
             if (e.key === "ArrowRight") changeImage(1);
+        });
+
+        document.getElementById("lightbox").addEventListener("touchstart", function(e) {
+            startX = e.touches[0].clientX;
+        });
+
+        document.getElementById("lightbox").addEventListener("touchend", function(e) {
+            let endX = e.changedTouches[0].clientX;
+            let diffX = endX - startX;
+            if (diffX > 50) {
+                changeImage(-1);
+            } else if (diffX < -50) {
+                changeImage(1);
+            }
         });
     </script>
 </body>
