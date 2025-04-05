@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Telegraph Viewer</title>
+
+    <!-- Open Graph / Telegram Meta -->
+    <meta property="og:title" content="">
+    <meta property="og:description" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -63,7 +71,7 @@
             border: 2px solid #e0e0e0;
             color: #e0e0e0;
             text-decoration: none;
-            border-radius: 0; /* Острые углы */
+            border-radius: 0;
             margin: 5px 0;
             font-size: 16px;
             text-align: center;
@@ -81,18 +89,37 @@
         <img id="lightbox-img" src="" alt="" data-index="0">
         <div class="counter" id="counter"></div>
     </div>
-    
+
     <script>
         let startX = 0, startY = 0;
 
-        document.addEventListener("DOMContentLoaded", function() {
+        function updateMetaTags(title, description, imageUrl, pageUrl) {
+            const setMeta = (property, content) => {
+                let tag = document.querySelector(`meta[property='${property}']`);
+                if (!tag) {
+                    tag = document.createElement('meta');
+                    tag.setAttribute('property', property);
+                    document.head.appendChild(tag);
+                }
+                tag.setAttribute('content', content);
+            };
+
+            setMeta('og:title', title);
+            setMeta('og:description', description);
+            setMeta('og:type', 'article');
+            setMeta('og:url', pageUrl);
+            setMeta('og:image', imageUrl);
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
             let slug = window.location.search.replace("?", "").trim();
             if (!slug) {
                 document.getElementById("content").innerText = "Ошибка: не указан параметр страницы.";
                 return;
             }
 
-            const url = `https://corsproxy.io/?url=https://telegra.ph/${slug}`;
+            const pageUrl = `https://telegra.ph/${slug}`;
+            const url = `https://corsproxy.io/?url=${pageUrl}`;
 
             fetch(url)
                 .then(response => response.text())
@@ -104,6 +131,12 @@
                         document.getElementById("content").innerHTML = article.innerHTML;
                         setupImageClick();
                         setupLinks();
+
+                        const title = doc.querySelector("title")?.innerText || "Telegraph Article";
+                        const description = article.innerText.trim().split("\n")[0].slice(0, 150);
+                        const imageUrl = article.querySelector("img")?.src || "";
+
+                        updateMetaTags(title, description, imageUrl, window.location.href);
                     } else {
                         document.getElementById("content").innerText = "Статья не найдена.";
                     }
@@ -194,9 +227,9 @@
 
         document.getElementById("lightbox").addEventListener("wheel", function(e) {
             if (e.deltaY > 0) {
-                changeImage(1); // Перелистывание вправо (вперед)
+                changeImage(1);
             } else {
-                changeImage(-1); // Перелистывание влево (назад)
+                changeImage(-1);
             }
         });
     </script>
