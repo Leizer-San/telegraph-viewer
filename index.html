@@ -53,6 +53,11 @@
             visibility: visible;
             opacity: 1;
         }
+        .img-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
         .lightbox .counter {
             position: absolute;
             top: 10px;
@@ -85,8 +90,10 @@
     <div id="content">Загрузка...</div>
 
     <div class="lightbox" id="lightbox">
-        <img id="lightbox-img" src="" alt="" data-index="0">
-        <div class="counter" id="counter"></div>
+        <div class="img-wrapper">
+            <img id="lightbox-img" src="" alt="" data-index="0">
+            <div class="counter" id="counter"></div>
+        </div>
     </div>
 
     <script>
@@ -119,7 +126,6 @@
 
             const pageUrl = `https://telegra.ph/${slug}`;
             const url = `https://corsproxy.io/?url=${pageUrl}`;
-            console.log(url);
 
             fetch(url)
                 .then(response => response.text())
