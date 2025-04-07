@@ -55,10 +55,20 @@
         }
         .img-wrapper {
             position: relative;
-            display: inline-block;
+            max-width: 100%;
+            max-height: 100%;
         }
 
-        .lightbox .counter {
+        .img-wrapper img {
+            display: block;
+            max-width: 100vw;
+            max-height: 100vh;
+            height: auto;
+            width: auto;
+            margin: 0 auto;
+        }
+
+        .img-wrapper .counter {
             position: absolute;
             top: 10px;
             right: 10px;
@@ -68,6 +78,7 @@
             font-size: 18px;
             font-weight: bold;
             color: #fff;
+            z-index: 10;
         }
         a.button-link {
             display: inline-block;
