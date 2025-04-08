@@ -109,10 +109,101 @@
         .overlay-right {
             right: 0;
         }
+
+        /* Стили для заголовка статьи */
+        .article-header {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .article-header h1 {
+            font-size: 28px;
+            margin: 0 0 10px 0;
+            color: #fff;
+        }
+        .article-header address {
+            font-style: normal;
+            color: #aaa;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .article-header address a {
+            color: #aaa;
+            text-decoration: none;
+        }
+        .article-header address a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+        .article-header address time {
+            color: #777;
+        }
+        .slideshow-btn {
+            background: transparent;
+            border: 2px solid #e0e0e0;
+            color: #e0e0e0;
+            padding: 5px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 4px;
+            margin-left: 15px;
+        }
+        .slideshow-btn:hover {
+            background-color: #fff;
+            color: #000;
+        }
+
+        /* Стили для формы ввода */
+        .url-input-container {
+            text-align: center;
+            margin-top: 100px;
+        }
+        .url-input {
+            padding: 12px 15px;
+            width: 70%;
+            max-width: 500px;
+            border: 2px solid #e0e0e0;
+            background: transparent;
+            color: #e0e0e0;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .url-submit {
+            padding: 12px 25px;
+            background: transparent;
+            border: 2px solid #e0e0e0;
+            color: #e0e0e0;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .url-submit:hover {
+            background-color: #fff;
+            color: #000;
+        }
+        .instructions {
+            margin-top: 20px;
+            color: #aaa;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
-    <div id="content">Загрузка...</div>
+    <div id="content">
+        <div class="url-input-container">
+            <h2>Telegraph Article Viewer</h2>
+            <input type="text" class="url-input" id="telegraph-url" placeholder="Введите URL статьи Telegraph (например: https://telegra.ph/example)">
+            <button class="url-submit" id="show-article">Show</button>
+            <div class="instructions">
+                Введите полный URL статьи Telegraph или только её часть после telegra.ph/<br>
+                Например: "example-url" или "https://telegra.ph/example-url"
+            </div>
+        </div>
+    </div>
 
     <div class="lightbox" id="lightbox">
         <div class="img-wrapper">
@@ -125,6 +216,8 @@
 
     <script>
         let startX = 0, startY = 0;
+        let slideshowInterval = null;
+        let isSlideshowActive = false;
 
         function updateMetaTags(title, description, imageUrl, pageUrl) {
             const setMeta = (property, content) => {
@@ -144,10 +237,92 @@
             setMeta('og:image', imageUrl);
         }
 
-        document.addEventListener("DOMContentLoaded", function () {
-            let slug = window.location.search.replace("?", "").trim();
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+        }
+
+        function removeDuplicateHeader(articleContent, headerInfo) {
+            if (!articleContent) return '';
+
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = articleContent;
+            const children = Array.from(tempDiv.children);
+
+            if (children.length > 0) {
+                const firstChild = children[0];
+
+                if (firstChild.tagName === 'H1' && firstChild.textContent.trim() === headerInfo?.title?.trim()) {
+                    firstChild.remove();
+                }
+
+                if (children.length > 1) {
+                    const secondChild = children[1];
+                    const headerAuthorLink = headerInfo?.authorLink?.match(/href="([^"]*)"/)?.[1] || '';
+                    const articleAuthorLink = secondChild.querySelector('a')?.getAttribute('href') || '';
+
+                    if (secondChild.tagName === 'ADDRESS' && headerAuthorLink === articleAuthorLink) {
+                        secondChild.remove();
+                    }
+                }
+            }
+
+            return tempDiv.innerHTML;
+        }
+
+        function startSlideshow() {
+            if (isSlideshowActive) {
+                stopSlideshow();
+                return;
+            }
+
+            const images = Array.from(document.querySelectorAll("#content img"));
+            if (images.length === 0) return;
+
+            // Открываем первое изображение
+            openLightbox(0);
+            isSlideshowActive = true;
+            document.querySelector('.slideshow-btn').textContent = 'Stop Slideshow';
+
+            // Запускаем интервал для смены изображений каждые 8 секунд
+            slideshowInterval = setInterval(() => {
+                const currentIndex = parseInt(document.getElementById("lightbox-img").dataset.index);
+                const nextIndex = (currentIndex + 1) % images.length;
+                openLightbox(nextIndex);
+            }, 6000);
+        }
+
+        function stopSlideshow() {
+            if (slideshowInterval) {
+                clearInterval(slideshowInterval);
+                slideshowInterval = null;
+            }
+            isSlideshowActive = false;
+            if (document.querySelector('.slideshow-btn')) {
+                document.querySelector('.slideshow-btn').textContent = 'Slideshow';
+            }
+        }
+
+        function loadArticle(slug) {
             if (!slug) {
-                document.getElementById("content").innerText = "Ошибка: не указан параметр страницы.";
+                document.getElementById("content").innerHTML = `
+                    <div class="url-input-container">
+                        <h2>Telegraph Article Viewer</h2>
+                        <input type="text" class="url-input" id="telegraph-url" placeholder="Введите URL статьи Telegraph (например: https://telegra.ph/example)">
+                        <button class="url-submit" id="show-article">Show</button>
+                        <div class="instructions">
+                            Введите полный URL статьи Telegraph или только её часть после telegra.ph/<br>
+                            Например: "example-url" или "https://telegra.ph/example-url"
+                        </div>
+                    </div>
+                `;
+                document.getElementById('telegraph-url').focus();
+                document.getElementById('show-article').addEventListener('click', handleUrlSubmit);
+                document.getElementById('telegraph-url').addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') handleUrlSubmit();
+                });
                 return;
             }
 
@@ -160,21 +335,117 @@
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, "text/html");
                     const article = doc.querySelector("article");
-                    if (article) {
-                        document.getElementById("content").innerHTML = article.innerHTML;
+                    const header = doc.querySelector(".tl_article_header");
+
+                    if (article || header) {
+                        let contentHTML = '';
+                        let headerInfo = {};
+
+                        // Обрабатываем заголовок статьи
+                        if (header) {
+                            const title = header.querySelector("h1")?.textContent || "";
+                            const authorLink = header.querySelector("address a")?.outerHTML || "";
+                            const authorHref = header.querySelector("address a")?.getAttribute('href') || "";
+                            const timeElement = header.querySelector("time");
+                            let date = '';
+
+                            headerInfo = {
+                                title: title,
+                                authorLink: authorLink,
+                                authorHref: authorHref
+                            };
+
+                            if (timeElement) {
+                                const datetime = timeElement.getAttribute("datetime");
+                                date = datetime
+                                    ? `<time>${formatDate(datetime)}</time>`
+                                    : timeElement.outerHTML;
+                            }
+
+                            contentHTML += `
+                                <div class="article-header">
+                                    <div>
+                                        <h1>${title}</h1>
+                                        <address>${authorLink} ${date}</address>
+                                    </div>
+                                    <button class="slideshow-btn">Slideshow</button>
+                                </div>
+                            `;
+                        }
+
+                        if (article) {
+                            const cleanedContent = removeDuplicateHeader(article.innerHTML, headerInfo);
+                            contentHTML += cleanedContent;
+                        }
+
+                        document.getElementById("content").innerHTML = contentHTML;
                         setupImageClick();
                         setupLinks();
 
-                        const title = doc.querySelector("title")?.innerText || "Telegraph Article";
-                        const description = article.innerText.trim().split("\n")[0].slice(0, 150);
-                        const imageUrl = article.querySelector("img")?.src || "";
+                        // Добавляем обработчик для кнопки слайдшоу
+                        document.querySelector('.slideshow-btn')?.addEventListener('click', startSlideshow);
 
-                        updateMetaTags(title, description, imageUrl, window.location.href);
+                        // Обновляем мета-теги
+                        const metaTitle = doc.querySelector("title")?.textContent || "Telegraph Article";
+                        const metaDescription = article?.textContent.trim().split("\n")[0].slice(0, 150) || "";
+                        const metaImage = article?.querySelector("img")?.src || "";
+                        updateMetaTags(metaTitle, metaDescription, metaImage, window.location.href);
                     } else {
-                        document.getElementById("content").innerText = "Статья не найдена.";
+                        document.getElementById("content").innerHTML = `
+                            <div class="url-input-container">
+                                <h2>Статья не найдена</h2>
+                                <input type="text" class="url-input" id="telegraph-url" placeholder="Введите URL статьи Telegraph (например: https://telegra.ph/example)">
+                                <button class="url-submit" id="show-article">Show</button>
+                                <div class="instructions">
+                                    Введите полный URL статьи Telegraph или только её часть после telegra.ph/<br>
+                                    Например: "example-url" или "https://telegra.ph/example-url"
+                                </div>
+                            </div>
+                        `;
+                        document.getElementById('telegraph-url').focus();
+                        document.getElementById('show-article').addEventListener('click', handleUrlSubmit);
+                        document.getElementById('telegraph-url').addEventListener('keypress', function(e) {
+                            if (e.key === 'Enter') handleUrlSubmit();
+                        });
                     }
+                })
+                .catch(error => {
+                    console.error("Ошибка загрузки:", error);
+                    document.getElementById("content").innerHTML = `
+                        <div class="url-input-container">
+                            <h2>Ошибка загрузки статьи</h2>
+                            <input type="text" class="url-input" id="telegraph-url" placeholder="Введите URL статьи Telegraph (например: https://telegra.ph/example)">
+                            <button class="url-submit" id="show-article">Show</button>
+                            <div class="instructions">
+                                Введите полный URL статьи Telegraph или только её часть после telegra.ph/<br>
+                                Например: "example-url" или "https://telegra.ph/example-url"
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('telegraph-url').focus();
+                    document.getElementById('show-article').addEventListener('click', handleUrlSubmit);
+                    document.getElementById('telegraph-url').addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') handleUrlSubmit();
+                    });
                 });
-        });
+        }
+
+        function handleUrlSubmit() {
+            const input = document.getElementById('telegraph-url').value.trim();
+            let slug = '';
+
+            if (input.startsWith('http')) {
+                const url = new URL(input);
+                slug = url.pathname.replace(/^\//, '').split('/')[0];
+            } else {
+                slug = input.split('/')[0];
+            }
+
+            if (slug) {
+                window.history.pushState({}, '', `?${slug}`);
+                loadArticle(slug);
+            }
+        }
 
         function setupImageClick() {
             let images = Array.from(document.querySelectorAll("#content img"));
@@ -188,9 +459,12 @@
         }
 
         function setupLinks() {
-            let links = document.querySelectorAll("#content a");
-            links.forEach(link => {
-                link.classList.add("button-link");
+            const paragraphs = document.querySelectorAll('#content p');
+            paragraphs.forEach(p => {
+                const links = p.querySelectorAll('a');
+                links.forEach(link => {
+                    link.classList.add("button-link");
+                });
             });
         }
 
@@ -214,6 +488,7 @@
                 document.exitFullscreen();
             }
             document.body.style.overflow = "auto";
+            stopSlideshow();
         }
 
         function changeImage(direction) {
@@ -224,6 +499,7 @@
             }
         }
 
+        // Обработчики событий
         document.getElementById("lightbox").addEventListener("click", function(e) {
             if (e.target.id === "lightbox") closeLightbox();
         });
@@ -266,7 +542,6 @@
             }
         });
 
-        // Навигация по клику на оверлеи
         document.querySelector(".overlay-left").addEventListener("click", function(e) {
             e.stopPropagation();
             changeImage(-1);
@@ -275,6 +550,17 @@
         document.querySelector(".overlay-right").addEventListener("click", function(e) {
             e.stopPropagation();
             changeImage(1);
+        });
+
+        // Инициализация при загрузке страницы
+        document.addEventListener("DOMContentLoaded", function () {
+            let slug = window.location.search.replace("?", "").trim();
+            loadArticle(slug);
+
+            document.getElementById('show-article')?.addEventListener('click', handleUrlSubmit);
+            document.getElementById('telegraph-url')?.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') handleUrlSubmit();
+            });
         });
     </script>
 </body>
