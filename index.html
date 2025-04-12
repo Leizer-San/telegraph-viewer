@@ -286,7 +286,7 @@
             isSlideshowActive = true;
             document.querySelector('.slideshow-btn').textContent = 'Stop Slideshow';
 
-            // Запускаем интервал для смены изображений каждые 6 секунд
+            // Запускаем интервал для смены изображений каждые 8 секунд
             slideshowInterval = setInterval(() => {
                 const currentIndex = parseInt(document.getElementById("lightbox-img").dataset.index);
                 const nextIndex = (currentIndex + 1) % images.length;
@@ -306,10 +306,10 @@
         }
 
         function loadArticle(slug) {
-            const showErrorUI = (message = "Статья не найдена") => {
+            if (!slug) {
                 document.getElementById("content").innerHTML = `
                     <div class="url-input-container">
-                        <h2>${message}</h2>
+                        <h2>Telegraph Article Viewer</h2>
                         <input type="text" class="url-input" id="telegraph-url" placeholder="Введите URL статьи Telegraph (например: https://telegra.ph/example)">
                         <button class="url-submit" id="show-article">Show</button>
                         <div class="instructions">
@@ -323,105 +323,111 @@
                 document.getElementById('telegraph-url').addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') handleUrlSubmit();
                 });
-            };
-
-            if (!slug) {
-                showErrorUI();
                 return;
             }
 
             const pageUrl = `https://telegra.ph/${slug}`;
-            const proxyList = [
-                `https://thingproxy.freeboard.io/fetch/${pageUrl}`,
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(pageUrl)}`,
-                `https://corsproxy.io/?url=${pageUrl}`,
-                pageUrl // прямая попытка
-            ];
-        
-            const tryProxies = async (index = 0) => {
-                if (index >= proxyList.length) {
-                    showErrorUI("Статья не найдена или заблокирована (CORS)");
-                    return;
-                }
+            const url = `https://thingproxy.freeboard.io/fetch/${pageUrl}`;
 
-                const currentUrl = proxyList[index];
-                console.log(`Пробуем загрузить через: ${currentUrl}`);
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, "text/html");
+                    const article = doc.querySelector("article");
+                    const header = doc.querySelector(".tl_article_header");
 
-                try {
-                    const response = await fetch(currentUrl);
-                    if (!response.ok) throw new Error(`Ошибка ${response.status}`);
-                    const html = await response.text();
-                    renderTelegraphHTML(html);
-                } catch (err) {
-                    console.warn(`Не удалось загрузить через ${currentUrl}`, err);
-                    tryProxies(index + 1);
-                }
-            };
+                    if (article || header) {
+                        let contentHTML = '';
+                        let headerInfo = {};
 
-            tryProxies();
-        }
+                        // Обрабатываем заголовок статьи
+                        if (header) {
+                            const title = header.querySelector("h1")?.textContent || "";
+                            const authorLink = header.querySelector("address a")?.outerHTML || "";
+                            const authorHref = header.querySelector("address a")?.getAttribute('href') || "";
+                            const timeElement = header.querySelector("time");
+                            let date = '';
 
-        function renderTelegraphHTML(html) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, "text/html");
-            const article = doc.querySelector("article");
-            const header = doc.querySelector(".tl_article_header");
+                            headerInfo = {
+                                title: title,
+                                authorLink: authorLink,
+                                authorHref: authorHref
+                            };
 
-            if (article || header) {
-                let contentHTML = '';
-                let headerInfo = {};
+                            if (timeElement) {
+                                const datetime = timeElement.getAttribute("datetime");
+                                date = datetime
+                                    ? `<time>${formatDate(datetime)}</time>`
+                                    : timeElement.outerHTML;
+                            }
 
-                // Обрабатываем заголовок статьи
-                if (header) {
-                    const title = header.querySelector("h1")?.textContent || "";
-                    const authorLink = header.querySelector("address a")?.outerHTML || "";
-                    const authorHref = header.querySelector("address a")?.getAttribute('href') || "";
-                    const timeElement = header.querySelector("time");
-                    let date = '';
+                            contentHTML += `
+                                <div class="article-header">
+                                    <div>
+                                        <h1>${title}</h1>
+                                        <address>${authorLink} ${date}</address>
+                                    </div>
+                                    <button class="slideshow-btn">Slideshow</button>
+                                </div>
+                            `;
+                        }
 
-                    headerInfo = {
-                        title: title,
-                        authorLink: authorLink,
-                        authorHref: authorHref
-                    };
+                        if (article) {
+                            const cleanedContent = removeDuplicateHeader(article.innerHTML, headerInfo);
+                            contentHTML += cleanedContent;
+                        }
 
-                    if (timeElement) {
-                        const datetime = timeElement.getAttribute("datetime");
-                        date = datetime
-                            ? `<time>${formatDate(datetime)}</time>`
-                            : timeElement.outerHTML;
-                    }
+                        document.getElementById("content").innerHTML = contentHTML;
+                        setupImageClick();
+                        setupLinks();
 
-                    contentHTML += `
-                        <div class="article-header">
-                            <div>
-                                <h1>${title}</h1>
-                                <address>${authorLink} ${date}</address>
+                        // Добавляем обработчик для кнопки слайдшоу
+                        document.querySelector('.slideshow-btn')?.addEventListener('click', startSlideshow);
+
+                        // Обновляем мета-теги
+                        const metaTitle = doc.querySelector("title")?.textContent || "Telegraph Article";
+                        const metaDescription = article?.textContent.trim().split("\n")[0].slice(0, 150) || "";
+                        const metaImage = article?.querySelector("img")?.src || "";
+                        updateMetaTags(metaTitle, metaDescription, metaImage, window.location.href);
+                    } else {
+                        document.getElementById("content").innerHTML = `
+                            <div class="url-input-container">
+                                <h2>Статья не найдена</h2>
+                                <input type="text" class="url-input" id="telegraph-url" placeholder="Введите URL статьи Telegraph (например: https://telegra.ph/example)">
+                                <button class="url-submit" id="show-article">Show</button>
+                                <div class="instructions">
+                                    Введите полный URL статьи Telegraph или только её часть после telegra.ph/<br>
+                                    Например: "example-url" или "https://telegra.ph/example-url"
+                                </div>
                             </div>
-                            <button class="slideshow-btn">Slideshow</button>
+                        `;
+                        document.getElementById('telegraph-url').focus();
+                        document.getElementById('show-article').addEventListener('click', handleUrlSubmit);
+                        document.getElementById('telegraph-url').addEventListener('keypress', function(e) {
+                            if (e.key === 'Enter') handleUrlSubmit();
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Ошибка загрузки:", error);
+                    document.getElementById("content").innerHTML = `
+                        <div class="url-input-container">
+                            <h2>Ошибка загрузки статьи</h2>
+                            <input type="text" class="url-input" id="telegraph-url" placeholder="Введите URL статьи Telegraph (например: https://telegra.ph/example)">
+                            <button class="url-submit" id="show-article">Show</button>
+                            <div class="instructions">
+                                Введите полный URL статьи Telegraph или только её часть после telegra.ph/<br>
+                                Например: "example-url" или "https://telegra.ph/example-url"
+                            </div>
                         </div>
                     `;
-                }
-
-                if (article) {
-                    const cleanedContent = removeDuplicateHeader(article.innerHTML, headerInfo);
-                    contentHTML += cleanedContent;
-                }
-
-                document.getElementById("content").innerHTML = contentHTML;
-                setupImageClick();
-                setupLinks();
-
-                document.querySelector('.slideshow-btn')?.addEventListener('click', startSlideshow);
-
-                // Обновляем мета-теги
-                const metaTitle = doc.querySelector("title")?.textContent || "Telegraph Article";
-                const metaDescription = article?.textContent.trim().split("\n")[0].slice(0, 150) || "";
-                const metaImage = article?.querySelector("img")?.src || "";
-                updateMetaTags(metaTitle, metaDescription, metaImage, window.location.href);
-            } else {
-                document.getElementById("content").innerHTML = "<h2>Статья не найдена</h2>";
-            }
+                    document.getElementById('telegraph-url').focus();
+                    document.getElementById('show-article').addEventListener('click', handleUrlSubmit);
+                    document.getElementById('telegraph-url').addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') handleUrlSubmit();
+                    });
+                });
         }
 
         function handleUrlSubmit() {
@@ -532,7 +538,7 @@
             if (e.deltaY > 0) {
                 changeImage(1);
             } else {
-        Іі        changeImage(-1);
+                changeImage(-1);
             }
         });
 
