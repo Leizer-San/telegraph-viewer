@@ -355,6 +355,68 @@
                 });
         }
 
+        function renderTelegraphHTML(html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+            const article = doc.querySelector("article");
+            const header = doc.querySelector(".tl_article_header");
+        
+            if (article || header) {
+                let contentHTML = '';
+                let headerInfo = {};
+        
+                // Обрабатываем заголовок статьи
+                if (header) {
+                    const title = header.querySelector("h1")?.textContent || "";
+                    const authorLink = header.querySelector("address a")?.outerHTML || "";
+                    const authorHref = header.querySelector("address a")?.getAttribute('href') || "";
+                    const timeElement = header.querySelector("time");
+                    let date = '';
+        
+                    headerInfo = {
+                        title: title,
+                        authorLink: authorLink,
+                        authorHref: authorHref
+                    };
+        
+                    if (timeElement) {
+                        const datetime = timeElement.getAttribute("datetime");
+                        date = datetime
+                            ? `<time>${formatDate(datetime)}</time>`
+                            : timeElement.outerHTML;
+                    }
+        
+                    contentHTML += `
+                        <div class="article-header">
+                            <div>
+                                <h1>${title}</h1>
+                                <address>${authorLink} ${date}</address>
+                            </div>
+                            <button class="slideshow-btn">Slideshow</button>
+                        </div>
+                    `;
+                }
+        
+                if (article) {
+                    const cleanedContent = removeDuplicateHeader(article.innerHTML, headerInfo);
+                    contentHTML += cleanedContent;
+                }
+        
+                document.getElementById("content").innerHTML = contentHTML;
+                setupImageClick();
+                setupLinks();
+        
+                document.querySelector('.slideshow-btn')?.addEventListener('click', startSlideshow);
+        
+                // Обновляем мета-теги
+                const metaTitle = doc.querySelector("title")?.textContent || "Telegraph Article";
+                const metaDescription = article?.textContent.trim().split("\n")[0].slice(0, 150) || "";
+                const metaImage = article?.querySelector("img")?.src || "";
+                updateMetaTags(metaTitle, metaDescription, metaImage, window.location.href);
+            } else {
+                document.getElementById("content").innerHTML = "<h2>Статья не найдена</h2>";
+            }
+        }
 
         function handleUrlSubmit() {
             const input = document.getElementById('telegraph-url').value.trim();
