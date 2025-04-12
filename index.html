@@ -286,7 +286,7 @@
             isSlideshowActive = true;
             document.querySelector('.slideshow-btn').textContent = 'Stop Slideshow';
 
-            // Запускаем интервал для смены изображений каждые 8 секунд
+            // Запускаем интервал для смены изображений каждые 6 секунд
             slideshowInterval = setInterval(() => {
                 const currentIndex = parseInt(document.getElementById("lightbox-img").dataset.index);
                 const nextIndex = (currentIndex + 1) % images.length;
@@ -331,28 +331,34 @@
             }
 
             const pageUrl = `https://telegra.ph/${slug}`;
-            const proxyUrl = `https://api.allorigins.win/raw?url=${pageUrl}`;
+            const proxyList = [
+                `https://thingproxy.freeboard.io/fetch/${pageUrl}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(pageUrl)}`,
+                `https://corsproxy.io/?url=${pageUrl}`,
+                pageUrl // прямая попытка
+            ];
+        
+            const tryProxies = async (index = 0) => {
+                if (index >= proxyList.length) {
+                    showErrorUI("Статья не найдена или заблокирована (CORS)");
+                    return;
+                }
 
-            fetch(proxyUrl)
-                .then(response => {
-                    if (!response.ok) throw new Error(`Ошибка прокси: ${response.status}`);
-                    return response.text();
-                })
-                .then(renderTelegraphHTML)
-                .catch(err => {
-                    console.warn("Ошибка прокси-запроса, пробуем прямой:", err);
-                    // Пробуем напрямую (возможно с ошибкой CORS)
-                    fetch(pageUrl)
-                        .then(resp => {
-                            if (!resp.ok) throw new Error(`Ошибка Telegraph: ${resp.status}`);
-                            return resp.text();
-                        })
-                        .then(renderTelegraphHTML)
-                        .catch(finalErr => {
-                            console.error("Ошибка прямого запроса:", finalErr);
-                            showErrorUI("Статья не найдена или заблокирована (возможно CORS)");
-                        });
-                });
+                const currentUrl = proxyList[index];
+                console.log(`Пробуем загрузить через: ${currentUrl}`);
+
+                try {
+                    const response = await fetch(currentUrl);
+                    if (!response.ok) throw new Error(`Ошибка ${response.status}`);
+                    const html = await response.text();
+                    renderTelegraphHTML(html);
+                } catch (err) {
+                    console.warn(`Не удалось загрузить через ${currentUrl}`, err);
+                    tryProxies(index + 1);
+                }
+            };
+
+            tryProxies();
         }
 
         function renderTelegraphHTML(html) {
@@ -360,11 +366,11 @@
             const doc = parser.parseFromString(html, "text/html");
             const article = doc.querySelector("article");
             const header = doc.querySelector(".tl_article_header");
-        
+
             if (article || header) {
                 let contentHTML = '';
                 let headerInfo = {};
-        
+
                 // Обрабатываем заголовок статьи
                 if (header) {
                     const title = header.querySelector("h1")?.textContent || "";
@@ -372,20 +378,20 @@
                     const authorHref = header.querySelector("address a")?.getAttribute('href') || "";
                     const timeElement = header.querySelector("time");
                     let date = '';
-        
+
                     headerInfo = {
                         title: title,
                         authorLink: authorLink,
                         authorHref: authorHref
                     };
-        
+
                     if (timeElement) {
                         const datetime = timeElement.getAttribute("datetime");
                         date = datetime
                             ? `<time>${formatDate(datetime)}</time>`
                             : timeElement.outerHTML;
                     }
-        
+
                     contentHTML += `
                         <div class="article-header">
                             <div>
@@ -396,18 +402,18 @@
                         </div>
                     `;
                 }
-        
+
                 if (article) {
                     const cleanedContent = removeDuplicateHeader(article.innerHTML, headerInfo);
                     contentHTML += cleanedContent;
                 }
-        
+
                 document.getElementById("content").innerHTML = contentHTML;
                 setupImageClick();
                 setupLinks();
-        
+
                 document.querySelector('.slideshow-btn')?.addEventListener('click', startSlideshow);
-        
+
                 // Обновляем мета-теги
                 const metaTitle = doc.querySelector("title")?.textContent || "Telegraph Article";
                 const metaDescription = article?.textContent.trim().split("\n")[0].slice(0, 150) || "";
@@ -526,7 +532,7 @@
             if (e.deltaY > 0) {
                 changeImage(1);
             } else {
-                changeImage(-1);
+        Іі        changeImage(-1);
             }
         });
 
