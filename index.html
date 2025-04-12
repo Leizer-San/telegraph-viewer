@@ -331,7 +331,7 @@
             }
 
             const pageUrl = `https://telegra.ph/${slug}`;
-            const proxyUrl = `https://corsproxy.io/?url=${pageUrl}`;
+            const proxyUrl = `https://api.allorigins.win/raw?url=${pageUrl}`;
 
             fetch(proxyUrl)
                 .then(response => {
