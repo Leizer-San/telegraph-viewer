@@ -195,7 +195,7 @@
 <body>
     <div id="content">
         <div class="url-input-container">
-            <h2>Telegraph Viewer</h2>
+            <h2>Telegraph Article Viewer</h2>
             <input type="text" class="url-input" id="telegraph-url" placeholder="Введите URL статьи Telegraph (например: https://telegra.ph/example)">
             <button class="url-submit" id="show-article">Show</button>
             <div class="instructions">
@@ -306,10 +306,10 @@
         }
 
         function loadArticle(slug) {
-            if (!slug) {
+            const showErrorUI = (message = "Статья не найдена") => {
                 document.getElementById("content").innerHTML = `
                     <div class="url-input-container">
-                        <h2>Telegraph Article Viewer</h2>
+                        <h2>${message}</h2>
                         <input type="text" class="url-input" id="telegraph-url" placeholder="Введите URL статьи Telegraph (например: https://telegra.ph/example)">
                         <button class="url-submit" id="show-article">Show</button>
                         <div class="instructions">
@@ -323,112 +323,38 @@
                 document.getElementById('telegraph-url').addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') handleUrlSubmit();
                 });
+            };
+
+            if (!slug) {
+                showErrorUI();
                 return;
             }
 
             const pageUrl = `https://telegra.ph/${slug}`;
-            const url = `https://corsproxy.io/?url=${pageUrl}`;
+            const proxyUrl = `https://corsproxy.io/?url=${pageUrl}`;
 
-            fetch(url)
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, "text/html");
-                    const article = doc.querySelector("article");
-                    const header = doc.querySelector(".tl_article_header");
-
-                    if (article || header) {
-                        let contentHTML = '';
-                        let headerInfo = {};
-
-                        // Обрабатываем заголовок статьи
-                        if (header) {
-                            const title = header.querySelector("h1")?.textContent || "";
-                            const authorLink = header.querySelector("address a")?.outerHTML || "";
-                            const authorHref = header.querySelector("address a")?.getAttribute('href') || "";
-                            const timeElement = header.querySelector("time");
-                            let date = '';
-
-                            headerInfo = {
-                                title: title,
-                                authorLink: authorLink,
-                                authorHref: authorHref
-                            };
-
-                            if (timeElement) {
-                                const datetime = timeElement.getAttribute("datetime");
-                                date = datetime
-                                    ? `<time>${formatDate(datetime)}</time>`
-                                    : timeElement.outerHTML;
-                            }
-
-                            contentHTML += `
-                                <div class="article-header">
-                                    <div>
-                                        <h1>${title}</h1>
-                                        <address>${authorLink} ${date}</address>
-                                    </div>
-                                    <button class="slideshow-btn">Slideshow</button>
-                                </div>
-                            `;
-                        }
-
-                        if (article) {
-                            const cleanedContent = removeDuplicateHeader(article.innerHTML, headerInfo);
-                            contentHTML += cleanedContent;
-                        }
-
-                        document.getElementById("content").innerHTML = contentHTML;
-                        setupImageClick();
-                        setupLinks();
-
-                        // Добавляем обработчик для кнопки слайдшоу
-                        document.querySelector('.slideshow-btn')?.addEventListener('click', startSlideshow);
-
-                        // Обновляем мета-теги
-                        const metaTitle = doc.querySelector("title")?.textContent || "Telegraph Article";
-                        const metaDescription = article?.textContent.trim().split("\n")[0].slice(0, 150) || "";
-                        const metaImage = article?.querySelector("img")?.src || "";
-                        updateMetaTags(metaTitle, metaDescription, metaImage, window.location.href);
-                    } else {
-                        document.getElementById("content").innerHTML = `
-                            <div class="url-input-container">
-                                <h2>Статья не найдена</h2>
-                                <input type="text" class="url-input" id="telegraph-url" placeholder="Введите URL статьи Telegraph (например: https://telegra.ph/example)">
-                                <button class="url-submit" id="show-article">Show</button>
-                                <div class="instructions">
-                                    Введите полный URL статьи Telegraph или только её часть после telegra.ph/<br>
-                                    Например: "example-url" или "https://telegra.ph/example-url"
-                                </div>
-                            </div>
-                        `;
-                        document.getElementById('telegraph-url').focus();
-                        document.getElementById('show-article').addEventListener('click', handleUrlSubmit);
-                        document.getElementById('telegraph-url').addEventListener('keypress', function(e) {
-                            if (e.key === 'Enter') handleUrlSubmit();
-                        });
-                    }
+            fetch(proxyUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error(`Ошибка прокси: ${response.status}`);
+                    return response.text();
                 })
-                .catch(error => {
-                    console.error("Ошибка загрузки:", error);
-                    document.getElementById("content").innerHTML = `
-                        <div class="url-input-container">
-                            <h2>Ошибка загрузки статьи</h2>
-                            <input type="text" class="url-input" id="telegraph-url" placeholder="Введите URL статьи Telegraph (например: https://telegra.ph/example)">
-                            <button class="url-submit" id="show-article">Show</button>
-                            <div class="instructions">
-                                Введите полный URL статьи Telegraph или только её часть после telegra.ph/<br>
-                                Например: "example-url" или "https://telegra.ph/example-url"
-                            </div>
-                        </div>
-                    `;
-                    document.getElementById('telegraph-url').focus();
-                    document.getElementById('show-article').addEventListener('click', handleUrlSubmit);
-                    document.getElementById('telegraph-url').addEventListener('keypress', function(e) {
-                        if (e.key === 'Enter') handleUrlSubmit();
-                    });
+                .then(renderTelegraphHTML)
+                .catch(err => {
+                    console.warn("Ошибка прокси-запроса, пробуем прямой:", err);
+                    // Пробуем напрямую (возможно с ошибкой CORS)
+                    fetch(pageUrl)
+                        .then(resp => {
+                            if (!resp.ok) throw new Error(`Ошибка Telegraph: ${resp.status}`);
+                            return resp.text();
+                        })
+                        .then(renderTelegraphHTML)
+                        .catch(finalErr => {
+                            console.error("Ошибка прямого запроса:", finalErr);
+                            showErrorUI("Статья не найдена или заблокирована (возможно CORS)");
+                        });
                 });
         }
+
 
         function handleUrlSubmit() {
             const input = document.getElementById('telegraph-url').value.trim();
