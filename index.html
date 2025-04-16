@@ -326,17 +326,24 @@
             const images = Array.from(document.querySelectorAll("#content img"));
             if (images.length === 0) return;
 
-            // Открываем первое изображение
+            // Запрос у пользователя длительности показа слайда
+            let duration = prompt("Введите длительность показа одного слайда (в секундах):", "6");
+            duration = parseInt(duration) * 1000;
+
+            if (isNaN(duration) || duration < 1000) {
+                alert("Пожалуйста, введите корректное число (не менее 1 секунды).");
+                return;
+            }
+
             openLightbox(0);
             isSlideshowActive = true;
             document.querySelector('.slideshow-btn').textContent = 'Stop Slideshow';
 
-            // Запускаем интервал для смены изображений каждые 8 секунд
             slideshowInterval = setInterval(() => {
                 const currentIndex = parseInt(document.getElementById("lightbox-img").dataset.index);
                 const nextIndex = (currentIndex + 1) % images.length;
                 openLightbox(nextIndex);
-            }, 6000);
+            }, duration);
         }
 
         function stopSlideshow() {
