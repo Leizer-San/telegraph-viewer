@@ -399,7 +399,7 @@
             }
 
             const pageUrl = `https://telegra.ph/${slug}`;
-            const url = `https://cors.eu.org/${pageUrl}`;
+            const url = `https://api.cors.lol/?url=${pageUrl}`;
 
             fetch(url)
                 .then(response => response.text())
