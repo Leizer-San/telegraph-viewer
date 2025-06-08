@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>LeizerGraph Viewer</title>
+    <title>LeizerManga Reader</title>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-0RZHNSPH9K"></script>
@@ -11,629 +11,1269 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-0RZHNSPH9K');
     </script>
 
-    <meta property="og:title" content="LeizerGraph">
-    <meta property="og:description" content="">
-    <meta property="og:type" content="img">
-    <meta property="og:url" content="LeizerGraph">
+    <meta property="og:title" content="LeizerManga Reader">
+    <meta property="og:description" content="Современный читатель манги с поддержкой Telegraph">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="LeizerManga">
     <meta property="og:image" content="https://cdn-images.dzcdn.net/images/cover/0f1c81210af1d4270fc7531249e61707/0x1900-000000-80-0-0.jpg">
 
-    <!-- Основные SEO мета-теги -->
-    <meta name="description" content="LeizerGraph Viewer — инструмент для просмотра статей Telegraph. Просто вставьте ссылку и читайте без ограничений.">
-    <meta name="keywords" content="Telegraph Viewer, просмотр Telegraph, статьи Telegraph, LeizerGraph, telegra.ph, Genshin impact hentai, Genshin impact 18+, Genshin impact NSFW, Геншин импакт хентай, Геншин импакт 18+, тг, телеграм, telegram, tg, Honkai star rail hentai, Honkai star rail 18+, Honkai star rail nsfw, hsr hentai, hsr 18+, hsr nsfw, хонкай хентай, хонкай 18+, хср 18+, hsr hentai telegram, Zenless zone zero 18+ telegram, Zenless zone zero hentai telegram, Zenless zone zero 18+, Zenless zone zero hentai, zzz hentai, zzz 18+, zzz nsfw, хентай, хентай арты">
+    <meta name="description" content="LeizerManga Reader — современный читатель манги с поддержкой Telegraph, архивов и различных источников изображений.">
+    <meta name="keywords" content="manga reader, читатель манги, Telegraph manga, онлайн манга, manga viewer, LeizerManga">
     <meta name="robots" content="index, follow">
-
-    <!-- Автор и копирайт -->
-    <meta name="author" content="LeizerGraph">
-    <meta name="copyright" content="LeizerGraph">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "LeizerGraph Viewer",
-      "url": "hhttps://leizergraph.xyz",
-      "description": "Инструмент для просмотра статей Telegraph без ограничений.",
-      "applicationCategory": "Utility",
-      "operatingSystem": "All",
-      "author": {
-        "@type": "Organization",
-        "name": "LeizerGraph"
-      }
-    }
-    </script>
+    <meta name="author" content="LeizerManga">
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 900px;
-            margin: 40px auto;
+        * {
+            margin: 0;
             padding: 0;
-            background: #121212;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
             color: #e0e0e0;
-            line-height: 1.8;
-            overflow: auto;
+            overflow-x: hidden;
         }
-        img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 20px auto;
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #333;
+            padding: 10px 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.3s ease;
+            height: 50px;
+        }
+
+        .header.hidden {
+            transform: translateY(-100%);
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid #555;
+            color: #e0e0e0;
+            padding: 8px 16px;
             cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s ease;
         }
-        .lightbox {
+
+        .btn:hover {
+            background: #333;
+            border-color: #777;
+        }
+
+        .btn.active {
+            background: #007acc;
+            border-color: #007acc;
+            color: #fff;
+        }
+
+        /* Main Content */
+        .main-content {
+            min-height: calc(100vh - 50px);
+        }
+
+        /* Loading Screen */
+        .loading-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 1);
+            background: #0a0a0a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .loading-screen h1 {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        .input-group {
+            width: 100%;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            background: transparent;
+            border: 2px solid #555;
+            color: #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #007acc;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            display: block;
+            padding: 12px 16px;
+            background: transparent;
+            border: 2px dashed #555;
+            color: #e0e0e0;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-label:hover {
+            border-color: #007acc;
+            background: rgba(0, 122, 204, 0.1);
+        }
+
+        .load-btn {
+            padding: 12px 30px;
+            background: #007acc;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .load-btn:hover {
+            background: #005c99;
+        }
+
+        /* Reader Interface */
+        .reader-interface {
+            display: none;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .reader-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Reading Modes */
+        .single-page-mode {
             display: flex;
             align-items: center;
             justify-content: center;
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            overflow: hidden;
-        }
-        .lightbox img {
-            max-width: 100%;
-            max-height: 100%;
-        }
-        .lightbox.show {
-            visibility: visible;
-            opacity: 1;
-        }
-        .img-wrapper {
+            flex: 1;
+            background: #000;
             position: relative;
-            max-width: 100%;
-            max-height: 100%;
         }
-        .img-wrapper img {
-            display: block;
-            max-width: 100vw;
+
+        .continuous-mode {
+            flex: 1;
+            overflow-y: auto;
+            background: #000;
+            padding: 20px 0;
+        }
+
+        .manga-image {
+            max-width: 100%;
             max-height: 100vh;
             height: auto;
             width: auto;
+            display: block;
             margin: 0 auto;
-        }
-        .img-wrapper .counter {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 3px 4px;
-            line-height: 1.1;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
-            z-index: 10;
-        }
-        a.button-link {
-            display: inline-block;
-            padding: 10px 20px;
-            border: 2px solid #e0e0e0;
-            color: #e0e0e0;
-            text-decoration: none;
-            border-radius: 0;
-            margin: 5px 0;
-            font-size: 16px;
-            text-align: center;
-        }
-        a.button-link:hover {
-            background-color: #fff;
-            color: #000;
+            cursor: pointer;
+            transition: transform 0.3s ease;
         }
 
-        /* Оверлеи для навигации */
-        .overlay-left, .overlay-right {
+        .continuous-mode .manga-image {
+            margin-bottom: 5px;
+            max-height: none;
+        }
+
+        .manga-image:hover {
+            transform: scale(1.02);
+        }
+
+        /* Navigation */
+        .nav-overlay {
             position: absolute;
             top: 0;
             bottom: 0;
-            width: 25%;
-            z-index: 5;
+            width: 30%;
             cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: rgba(0, 0, 0, 0.1);
         }
-        .overlay-left {
+
+        .nav-overlay:hover {
+            opacity: 1;
+        }
+
+        .nav-left {
             left: 0;
         }
-        .overlay-right {
+
+        .nav-right {
             right: 0;
         }
 
-        /* Стили для заголовка статьи */
-        .article-header {
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            padding-left: 15px;
-            padding-right: 15px;
-            border-bottom: 1px solid #333;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-        .article-header h1 {
-            font-size: 28px;
-            margin: 0 0 10px 0;
+        .nav-arrow {
+            font-size: 48px;
             color: #fff;
-        }
-        .article-header address {
-            font-style: normal;
-            color: #aaa;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .article-header address a {
-            color: #aaa;
-            text-decoration: none;
-        }
-        .article-header address a:hover {
-            color: #fff;
-            text-decoration: underline;
-        }
-        .article-header address time {
-            color: #777;
-        }
-        .slideshow-btn {
-            background: transparent;
-            border: 2px solid #e0e0e0;
-            color: #e0e0e0;
-            padding: 5px 15px;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 4px;
-            margin-left: 15px;
-        }
-        .slideshow-btn:hover {
-            background-color: #fff;
-            color: #000;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
 
-        /* Стили для формы ввода */
-        .url-input-container {
-            text-align: center;
-            margin-top: 100px;
+        /* Bottom Controls */
+        .bottom-controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #333;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
         }
-        .url-input {
-            padding: 12px 15px;
-            width: 70%;
-            max-width: 500px;
-            border: 2px solid #e0e0e0;
-            background: transparent;
-            color: #e0e0e0;
-            font-size: 16px;
-            margin-right: 10px;
+
+        .bottom-controls.hidden {
+            transform: translateY(100%);
         }
-        .url-submit {
-            padding: 12px 25px;
-            background: transparent;
-            border: 2px solid #e0e0e0;
-            color: #e0e0e0;
-            font-size: 16px;
+
+        .page-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-counter {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .page-slider {
+            width: 200px;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            outline: none;
             cursor: pointer;
         }
-        .url-submit:hover {
-            background-color: #fff;
-            color: #000;
+
+        .page-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #007acc;
+            border-radius: 50%;
+            cursor: pointer;
         }
-        .instructions {
-            margin-top: 20px;
-            color: #aaa;
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            top: 60px;
+            right: -300px;
+            width: 300px;
+            height: calc(100vh - 60px);
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid #333;
+            padding: 20px;
+            transition: right 0.3s ease;
+            z-index: 500;
+            overflow-y: auto;
+        }
+
+        .settings-panel.open {
+            right: 0;
+        }
+
+        .settings-group {
+            margin-bottom: 25px;
+        }
+
+        .settings-group h3 {
+            margin-bottom: 15px;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .setting-item label {
+            color: #ccc;
             font-size: 14px;
+        }
+
+        .setting-toggle {
+            width: 50px;
+            height: 26px;
+            background: #333;
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .setting-toggle.active {
+            background: #007acc;
+        }
+
+        .setting-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .setting-toggle.active::after {
+            transform: translateX(24px);
+        }
+
+        /* Width slider styles */
+        .width-slider {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .width-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #007acc;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .width-value {
+            color: #ccc;
+            font-size: 12px;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        /* Fullscreen styles */
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 3000;
+        }
+
+        .fullscreen .manga-image {
+            max-width: 100vw;
+            max-height: 100vh;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .header-controls {
+                gap: 8px;
+            }
+
+            .btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .nav-overlay {
+                width: 35%;
+            }
+
+            .nav-arrow {
+                font-size: 36px;
+            }
+
+            .page-slider {
+                width: 120px;
+            }
+
+            .settings-panel {
+                width: 100%;
+                right: -100%;
+            }
+        }
+
+        /* Progress indicator */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: #007acc;
+            transition: width 0.3s ease;
+            z-index: 999;
+        }
+
+        /* Image loading placeholder */
+        .image-placeholder {
+            width: 100%;
+            height: 400px;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #333;
+            border-top: 4px solid #007acc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div id="content">
-        <div class="url-input-container">
-            <h2>Telegraph Viewer</h2>
-            <input type="text" class="url-input" id="telegraph-url" placeholder="Введите URL статьи Telegraph (например: https://telegra.ph/example)">
-            <button class="url-submit" id="show-article">Show</button>
-            <div class="instructions">
-                Введите полный URL статьи Telegraph или только её часть после telegra.ph/<br>
-                Например: "example-url" или "https://telegra.ph/example-url"
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="logo">LeizerManga Reader</div>
+        <div class="header-controls">
+            <button class="btn" id="reading-mode-btn">Single Page</button>
+            <button class="btn" id="settings-btn">Settings</button>
+            <button class="btn" id="fullscreen-btn">Fullscreen</button>
+            <button class="btn" id="home-btn">Home</button>
+        </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progress-bar"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Loading Screen -->
+        <div class="loading-screen" id="loading-screen">
+            <h1>LeizerManga Reader</h1>
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="telegraph-url">Telegraph URL</label>
+                    <input type="text" id="telegraph-url" class="input-field" placeholder="https://telegra.ph/example или просто example">
+                </div>
+                
+                <div class="input-group">
+                    <label for="images-url">Прямые ссылки на изображения</label>
+                    <textarea id="images-url" class="input-field" rows="4" placeholder="Введите ссылки на изображения, каждую с новой строки"></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label for="file-input">Загрузить архив или изображения</label>
+                    <input type="file" id="file-input" class="file-input" multiple accept=".zip,.rar,.cbz,.cbr,image/*">
+                    <label for="file-input" class="file-label">
+                        Выберите файлы (ZIP, RAR, CBZ, CBR или изображения)
+                    </label>
+                </div>
+
+                <button class="load-btn" id="load-btn">Загрузить</button>
+            </div>
+        </div>
+
+        <!-- Reader Interface -->
+        <div class="reader-interface" id="reader-interface">
+            <div class="reader-content">
+                <div class="single-page-mode" id="single-page-mode">
+                    <div class="nav-overlay nav-left" id="nav-left">
+                        <div class="nav-arrow">‹</div>
+                    </div>
+                    <img class="manga-image" id="current-image" src="" alt="Manga page">
+                    <div class="nav-overlay nav-right" id="nav-right">
+                        <div class="nav-arrow">›</div>
+                    </div>
+                </div>
+                <div class="continuous-mode" id="continuous-mode" style="display: none;">
+                    <!-- Images will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Controls -->
+    <div class="bottom-controls" id="bottom-controls">
+        <div class="control-buttons">
+            <button class="btn" id="prev-btn">‹ Prev</button>
+            <button class="btn" id="next-btn">Next ›</button>
+        </div>
+        <div class="page-info">
+            <span class="page-counter" id="page-counter">1 / 1</span>
+            <input type="range" class="page-slider" id="page-slider" min="1" max="1" value="1">
+        </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settings-panel">
+        <div class="settings-group">
+            <h3>Режим чтения</h3>
+            <div class="setting-item">
+                <label>Непрерывная прокрутка</label>
+                <div class="setting-toggle" id="continuous-toggle"></div>
+            </div>
+            <div class="setting-item">
+                <label>Автоскрытие интерфейса</label>
+                <div class="setting-toggle active" id="auto-hide-toggle"></div>
+            </div>
+        </div>
+        
+        <div class="settings-group">
+            <h3>Навигация</h3>
+            <div class="setting-item">
+                <label>Обратный порядок страниц</label>
+                <div class="setting-toggle" id="reverse-order-toggle"></div>
+            </div>
+            <div class="setting-item">
+                <label>Клик для перехода</label>
+                <div class="setting-toggle active" id="click-nav-toggle"></div>
+            </div>
+        </div>
+
+        <div class="settings-group">
+            <h3>Отображение</h3>
+            <div class="setting-item">
+                <label>Масштабирование изображений</label>
+                <div class="setting-toggle" id="image-scaling-toggle"></div>
+            </div>
+            <div class="setting-item">
+                <label>Скрыть нижнюю панель</label>
+                <div class="setting-toggle" id="bottom-panel-toggle"></div>
+            </div>
+            <div class="setting-item">
+                <label>Максимальная ширина изображений</label>
+                <div>
+                    <input type="range" class="width-slider" id="max-width-slider" min="400" max="2000" step="100" value="1000">
+                    <div class="width-value" id="width-value">1000px</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="lightbox" id="lightbox">
-        <div class="img-wrapper">
-            <img id="lightbox-img" src="" alt="" data-index="0">
-            <div class="counter" id="counter"></div>
-            <div class="overlay-left"></div>
-            <div class="overlay-right"></div>
-        </div>
-    </div>
-
-    <!-- Юридическое уведомление -->
-    <footer style="margin-top: 60px; text-align: center; font-size: 12px; color: #777;">
-        <p>
-            Этот сайт не хранит и не распространяет материалы, размещённые на платформе Telegraph.<br>
-            Все статьи обрабатываются динамически по введённой пользователем ссылке исключительно в информационных целях.
-        </p>
-    </footer>
-
-    <div id="slideshow-settings" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
-      <div style="background:#222; padding:30px; border-radius:10px; text-align:center;">
-        <h3 style="margin-bottom: 15px; color: #fff;">Введите время слайда (в секундах)</h3>
-        <input type="number" id="slideshow-time" min="1" value="6" style="padding:12px 15px; font-size:16px; border:2px solid #e0e0e0; background:transparent; color:#e0e0e0; width:80px;">
-        <div style="margin-top: 20px;">
-          <button id="slideshow-start" class="url-submit" style="margin-right:10px;">Начать</button>
-          <button id="slideshow-cancel" class="url-submit">Отмена</button>
-        </div>
-      </div>
-    </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
-        let startX = 0, startY = 0;
-        let slideshowInterval = null;
-        let isSlideshowActive = false;
-
-        function updateMetaTags(title, description, imageUrl, pageUrl) {
-            const setMeta = (property, content) => {
-                let tag = document.querySelector(`meta[property='${property}']`);
-                if (!tag) {
-                    tag = document.createElement('meta');
-                    tag.setAttribute('property', property);
-                    document.head.appendChild(tag);
-                }
-                tag.setAttribute('content', content);
-            };
-
-            setMeta('og:title', title);
-            setMeta('og:description', description);
-            setMeta('og:type', 'article');
-            setMeta('og:url', pageUrl);
-            setMeta('og:image', imageUrl);
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-            return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
-        }
-
-        function removeDuplicateHeader(articleContent, headerInfo) {
-            if (!articleContent) return '';
-
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = articleContent;
-            const children = Array.from(tempDiv.children);
-
-            if (children.length > 0) {
-                const firstChild = children[0];
-
-                if (firstChild.tagName === 'H1' && firstChild.textContent.trim() === headerInfo?.title?.trim()) {
-                    firstChild.remove();
-                }
-
-                if (children.length > 1) {
-                    const secondChild = children[1];
-                    const headerAuthorLink = headerInfo?.authorLink?.match(/href="([^"]*)"/)?.[1] || '';
-                    const articleAuthorLink = secondChild.querySelector('a')?.getAttribute('href') || '';
-
-                    if (secondChild.tagName === 'ADDRESS' && headerAuthorLink === articleAuthorLink) {
-                        secondChild.remove();
-                    }
-                }
+        class MangaReader {
+            constructor() {
+                this.images = [];
+                this.currentPage = 0;
+                this.isFullscreen = false;
+                this.isContinuousMode = false;
+                this.autoHide = true;
+                this.reverseOrder = false;
+                this.clickNav = true;
+                this.imageScaling = false;
+                this.maxImageWidth = 1000;
+                this.hideBottomPanel = false;
+                this.hideTimeout = null;
+                
+                this.initElements();
+                this.bindEvents();
+                this.loadSettings();
             }
 
-            return tempDiv.innerHTML;
-        }
-
-        document.getElementById("slideshow-start").addEventListener("click", () => {
-            const durationInput = document.getElementById("slideshow-time").value;
-            const duration = parseInt(durationInput) * 1000;
-            if (isNaN(duration) || duration < 1000) {
-                alert("Введите корректное число (не менее 1 секунды).");
-                return;
+            initElements() {
+                this.loadingScreen = document.getElementById('loading-screen');
+                this.readerInterface = document.getElementById('reader-interface');
+                this.header = document.getElementById('header');
+                this.bottomControls = document.getElementById('bottom-controls');
+                this.settingsPanel = document.getElementById('settings-panel');
+                this.progressBar = document.getElementById('progress-bar');
+                
+                this.currentImage = document.getElementById('current-image');
+                this.singlePageMode = document.getElementById('single-page-mode');
+                this.continuousMode = document.getElementById('continuous-mode');
+                
+                this.pageCounter = document.getElementById('page-counter');
+                this.pageSlider = document.getElementById('page-slider');
             }
 
-            const images = Array.from(document.querySelectorAll("#content img"));
-            if (images.length === 0) return;
-
-            openLightbox(0);
-            isSlideshowActive = true;
-            document.querySelector('.slideshow-btn').textContent = 'Stop Slideshow';
-
-            slideshowInterval = setInterval(() => {
-                const currentIndex = parseInt(document.getElementById("lightbox-img").dataset.index);
-                const nextIndex = (currentIndex + 1) % images.length;
-                openLightbox(nextIndex);
-            }, duration);
-
-            document.getElementById("slideshow-settings").style.display = "none";
-        });
-
-        document.getElementById("slideshow-cancel").addEventListener("click", () => {
-            document.getElementById("slideshow-settings").style.display = "none";
-        });
-
-        function startSlideshow() {
-            if (isSlideshowActive) {
-                stopSlideshow();
-                return;
-            }
-
-            // Показываем всплывающее окно
-            document.getElementById("slideshow-settings").style.display = "flex";
-        }
-
-        function stopSlideshow() {
-            if (slideshowInterval) {
-                clearInterval(slideshowInterval);
-                slideshowInterval = null;
-            }
-            isSlideshowActive = false;
-            if (document.querySelector('.slideshow-btn')) {
-                document.querySelector('.slideshow-btn').textContent = 'Slideshow';
-            }
-        }
-
-        function loadArticle(slug) {
-            if (!slug) {
-                document.getElementById("content").innerHTML = `
-                    <div class="url-input-container">
-                        <h2>Telegraph Article Viewer</h2>
-                        <input type="text" class="url-input" id="telegraph-url" placeholder="Введите URL статьи Telegraph (например: https://telegra.ph/example)">
-                        <button class="url-submit" id="show-article">Show</button>
-                        <div class="instructions">
-                            Введите полный URL статьи Telegraph или только её часть после telegra.ph/<br>
-                            Например: "example-url" или "https://telegra.ph/example-url"
-                        </div>
-                    </div>
-                `;
-                document.getElementById('telegraph-url').focus();
-                document.getElementById('show-article').addEventListener('click', handleUrlSubmit);
-                document.getElementById('telegraph-url').addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') handleUrlSubmit();
+            bindEvents() {
+                // Load button
+                document.getElementById('load-btn').addEventListener('click', () => this.loadContent());
+                
+                // Enter key for Telegraph URL
+                document.getElementById('telegraph-url').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.loadContent();
                 });
-                return;
+
+                // Navigation
+                document.getElementById('nav-left').addEventListener('click', () => this.prevPage());
+                document.getElementById('nav-right').addEventListener('click', () => this.nextPage());
+                document.getElementById('prev-btn').addEventListener('click', () => this.prevPage());
+                document.getElementById('next-btn').addEventListener('click', () => this.nextPage());
+
+                // Page slider
+                this.pageSlider.addEventListener('input', (e) => {
+                    this.goToPage(parseInt(e.target.value) - 1);
+                });
+
+                // Width slider
+                document.getElementById('max-width-slider').addEventListener('input', (e) => {
+                    this.maxImageWidth = parseInt(e.target.value);
+                    document.getElementById('width-value').textContent = `${this.maxImageWidth}px`;
+                    this.updateImageWidths();
+                    this.saveSettings();
+                });
+
+                // Header buttons
+                document.getElementById('reading-mode-btn').addEventListener('click', () => this.toggleReadingMode());
+                document.getElementById('settings-btn').addEventListener('click', () => this.toggleSettings());
+                document.getElementById('fullscreen-btn').addEventListener('click', () => this.toggleFullscreen());
+                document.getElementById('home-btn').addEventListener('click', () => this.goHome());
+
+                // Settings toggles
+                document.getElementById('continuous-toggle').addEventListener('click', () => this.toggleContinuousMode());
+                document.getElementById('auto-hide-toggle').addEventListener('click', () => this.toggleAutoHide());
+                document.getElementById('reverse-order-toggle').addEventListener('click', () => this.toggleReverseOrder());
+                document.getElementById('click-nav-toggle').addEventListener('click', () => this.toggleClickNav());
+                document.getElementById('image-scaling-toggle').addEventListener('click', () => this.toggleImageScaling());
+                document.getElementById('bottom-panel-toggle').addEventListener('click', () => this.toggleBottomPanel());
+
+                // Keyboard controls
+                document.addEventListener('keydown', (e) => this.handleKeydown(e));
+                
+                // Mouse/touch events for interface visibility
+                document.addEventListener('mousemove', (e) => {
+                    // Show interface when mouse is near the top or bottom
+                    if (e.clientY < 60 || e.clientY > window.innerHeight - 60) {
+                        this.showInterface();
+                    } else {
+                        this.hideInterface();
+                    }
+                });
+                document.addEventListener('touchstart', () => this.showInterface());
+
+                // Image click navigation
+                this.currentImage.addEventListener('click', (e) => {
+                    if (!this.clickNav) return;
+                    const rect = this.currentImage.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const width = rect.width;
+                    
+                    if (x < width / 3) {
+                        this.prevPage();
+                    } else if (x > (width * 2) / 3) {
+                        this.nextPage();
+                    } else {
+                        this.toggleInterface();
+                    }
+                });
+
+                // Scroll handling for continuous mode
+                this.continuousMode.addEventListener('scroll', () => this.handleScroll());
             }
 
-            const pageUrl = `https://telegra.ph/${slug}`;
-            const url = `https://cors.eu.org/${pageUrl}`;
+            async loadContent() {
+                const telegraphUrl = document.getElementById('telegraph-url').value.trim();
+                const imagesUrl = document.getElementById('images-url').value.trim();
+                const fileInput = document.getElementById('file-input');
 
-            fetch(url)
-                .then(response => response.text())
-                .then(html => {
+                if (telegraphUrl) {
+                    await this.loadTelegraph(telegraphUrl);
+                } else if (imagesUrl) {
+                    this.loadImageUrls(imagesUrl);
+                } else if (fileInput.files.length > 0) {
+                    await this.loadFiles(fileInput.files);
+                } else {
+                    alert('Пожалуйста, введите URL Telegraph, ссылки на изображения или выберите файлы');
+                    return;
+                }
+
+                if (this.images.length > 0) {
+                    this.startReading();
+                }
+            }
+
+            async loadTelegraph(url) {
+                let slug = '';
+                if (url.startsWith('http')) {
+                    const urlObj = new URL(url);
+                    slug = urlObj.pathname.replace(/^\//, '').split('/')[0];
+                } else {
+                    slug = url.split('/')[0];
+                }
+
+                if (!slug) return;
+
+                const pageUrl = `https://telegra.ph/${slug}`;
+                const corsUrl = `https://cors.eu.org/${pageUrl}`;
+
+                try {
+                    const response = await fetch(corsUrl);
+                    const html = await response.text();
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, "text/html");
                     const article = doc.querySelector("article");
-                    const header = doc.querySelector(".tl_article_header");
 
-                    if (article || header) {
-                        let contentHTML = '';
-                        let headerInfo = {};
-
-                        // Обрабатываем заголовок статьи
-                        if (header) {
-                            const title = header.querySelector("h1")?.textContent || "";
-                            const authorLink = header.querySelector("address a")?.outerHTML || "";
-                            const authorHref = header.querySelector("address a")?.getAttribute('href') || "";
-                            const timeElement = header.querySelector("time");
-                            let date = '';
-
-                            headerInfo = {
-                                title: title,
-                                authorLink: authorLink,
-                                authorHref: authorHref
-                            };
-
-                            if (timeElement) {
-                                const datetime = timeElement.getAttribute("datetime");
-                                date = datetime
-                                    ? `<time>${formatDate(datetime)}</time>`
-                                    : timeElement.outerHTML;
-                            }
-
-                            contentHTML += `
-                                <div class="article-header">
-                                    <div>
-                                        <h1>${title}</h1>
-                                        <address>${authorLink} ${date}</address>
-                                    </div>
-                                    <button class="slideshow-btn">Slideshow</button>
-                                </div>
-                            `;
-                        }
-
-                        if (article) {
-                            const cleanedContent = removeDuplicateHeader(article.innerHTML, headerInfo);
-                            contentHTML += cleanedContent;
-                        }
-
-                        document.getElementById("content").innerHTML = contentHTML;
-                        setupImageClick();
-                        setupLinks();
-
-                        // Добавляем обработчик для кнопки слайдшоу
-                        document.querySelector('.slideshow-btn')?.addEventListener('click', startSlideshow);
-
-                        // Обновляем мета-теги
-                        const metaTitle = doc.querySelector("title")?.textContent || "Telegraph Article";
-                        const metaDescription = article?.textContent.trim().split("\n")[0].slice(0, 150) || "";
-                        const metaImage = article?.querySelector("img")?.src || "";
-                        updateMetaTags(metaTitle, metaDescription, metaImage, window.location.href);
-                    } else {
-                        document.getElementById("content").innerHTML = `
-                            <div class="url-input-container">
-                                <h2>Статья не найдена</h2>
-                                <input type="text" class="url-input" id="telegraph-url" placeholder="Введите URL статьи Telegraph (например: https://telegra.ph/example)">
-                                <button class="url-submit" id="show-article">Show</button>
-                                <div class="instructions">
-                                    Введите полный URL статьи Telegraph или только её часть после telegra.ph/<br>
-                                    Например: "example-url" или "https://telegra.ph/example-url"
-                                </div>
-                            </div>
-                        `;
-                        document.getElementById('telegraph-url').focus();
-                        document.getElementById('show-article').addEventListener('click', handleUrlSubmit);
-                        document.getElementById('telegraph-url').addEventListener('keypress', function(e) {
-                            if (e.key === 'Enter') handleUrlSubmit();
-                        });
+                    if (article) {
+                        const images = article.querySelectorAll("img");
+                        this.images = Array.from(images).map(img => img.src);
                     }
-                })
-                .catch(error => {
-                    console.error("Ошибка загрузки:", error);
-                    document.getElementById("content").innerHTML = `
-                        <div class="url-input-container">
-                            <h2>Ошибка загрузки статьи</h2>
-                            <input type="text" class="url-input" id="telegraph-url" placeholder="Введите URL статьи Telegraph (например: https://telegra.ph/example)">
-                            <button class="url-submit" id="show-article">Show</button>
-                            <div class="instructions">
-                                Введите полный URL статьи Telegraph или только её часть после telegra.ph/<br>
-                                Например: "example-url" или "https://telegra.ph/example-url"
-                            </div>
-                        </div>
-                    `;
-                    document.getElementById('telegraph-url').focus();
-                    document.getElementById('show-article').addEventListener('click', handleUrlSubmit);
-                    document.getElementById('telegraph-url').addEventListener('keypress', function(e) {
-                        if (e.key === 'Enter') handleUrlSubmit();
+                } catch (error) {
+                    console.error("Ошибка загрузки Telegraph:", error);
+                    alert("Ошибка загрузки статьи Telegraph");
+                }
+            }
+
+            loadImageUrls(urls) {
+                this.images = urls.split('\n')
+                    .map(url => url.trim())
+                    .filter(url => url && (url.startsWith('http') || url.startsWith('data:')));
+            }
+
+            async loadFiles(files) {
+                this.images = [];
+                
+                for (const file of files) {
+                    if (file.type.startsWith('image/')) {
+                        const url = URL.createObjectURL(file);
+                        this.images.push(url);
+                    } else if (file.name.endsWith('.zip') || file.name.endsWith('.cbz')) {
+                        await this.loadZipFile(file);
+                    }
+                }
+            }
+
+            async loadZipFile(file) {
+                try {
+                    const zip = new JSZip();
+                    const contents = await zip.loadAsync(file);
+                    const imageFiles = [];
+
+                    contents.forEach((relativePath, zipEntry) => {
+                        if (zipEntry.name.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+                            imageFiles.push({
+                                name: zipEntry.name,
+                                entry: zipEntry
+                            });
+                        }
                     });
-                });
-        }
 
-        function handleUrlSubmit() {
-            const input = document.getElementById('telegraph-url').value.trim();
-            let slug = '';
+                    // Sort files naturally
+                    imageFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}));
 
-            if (input.startsWith('http')) {
-                const url = new URL(input);
-                slug = url.pathname.replace(/^\//, '').split('/')[0];
-            } else {
-                slug = input.split('/')[0];
-            }
-
-            if (slug) {
-                window.history.pushState({}, '', `?${slug}`);
-                loadArticle(slug);
-            }
-        }
-
-        function setupImageClick() {
-            let images = Array.from(document.querySelectorAll("#content img"));
-            images.forEach((img, index) => {
-                img.dataset.index = index;
-                img.addEventListener("click", function(event) {
-                    event.stopPropagation();
-                    openLightbox(index);
-                });
-            });
-        }
-
-        function setupLinks() {
-            const paragraphs = document.querySelectorAll('#content p');
-            paragraphs.forEach(p => {
-                const links = p.querySelectorAll('a');
-                links.forEach(link => {
-                    link.classList.add("button-link");
-                });
-            });
-        }
-
-        function openLightbox(index) {
-            let images = Array.from(document.querySelectorAll("#content img"));
-            const lightboxImg = document.getElementById("lightbox-img");
-            lightboxImg.src = images[index].src;
-            lightboxImg.dataset.index = index;
-            document.getElementById("counter").innerText = `${index + 1} / ${images.length}`;
-            document.getElementById("lightbox").classList.add("show");
-            images[index].scrollIntoView({ behavior: "smooth", block: "center" });
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            }
-            document.body.style.overflow = "hidden";
-        }
-
-        function closeLightbox() {
-            document.getElementById("lightbox").classList.remove("show");
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-            }
-            document.body.style.overflow = "auto";
-            stopSlideshow();
-        }
-
-        function changeImage(direction) {
-            let images = Array.from(document.querySelectorAll("#content img"));
-            let currentIndex = parseInt(document.getElementById("lightbox-img").dataset.index);
-            if ((direction === -1 && currentIndex > 0) || (direction === 1 && currentIndex < images.length - 1)) {
-                openLightbox(currentIndex + direction);
-            }
-        }
-
-        // Обработчики событий
-        document.getElementById("lightbox").addEventListener("click", function(e) {
-            if (e.target.id === "lightbox") closeLightbox();
-        });
-
-        document.addEventListener("keydown", function(e) {
-            if (e.key === "Escape") closeLightbox();
-            if (e.key === "ArrowLeft") changeImage(-1);
-            if (e.key === "ArrowRight") changeImage(1);
-        });
-
-        document.getElementById("lightbox").addEventListener("touchstart", function(e) {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        });
-
-        document.getElementById("lightbox").addEventListener("touchend", function(e) {
-            let endX = e.changedTouches[0].clientX;
-            let endY = e.changedTouches[0].clientY;
-            let diffX = endX - startX;
-            let diffY = endY - startY;
-
-            if (Math.abs(diffX) > Math.abs(diffY)) {
-                if (diffX > 50) {
-                    changeImage(-1);
-                } else if (diffX < -50) {
-                    changeImage(1);
-                }
-            } else {
-                if (diffY < -50) {
-                    closeLightbox();
+                    for (const fileInfo of imageFiles) {
+                        const blob = await fileInfo.entry.async('blob');
+                        const url = URL.createObjectURL(blob);
+                        this.images.push(url);
+                    }
+                } catch (error) {
+                    console.error("Ошибка загрузки ZIP:", error);
+                    alert("Ошибка загрузки архива");
                 }
             }
-        });
 
-        document.getElementById("lightbox").addEventListener("wheel", function(e) {
-            if (e.deltaY > 0) {
-                changeImage(1);
-            } else {
-                changeImage(-1);
+            startReading() {
+                this.loadingScreen.style.display = 'none';
+                this.readerInterface.style.display = 'block';
+                this.bottomControls.classList.remove('hidden');
+                
+                if (this.reverseOrder) {
+                    this.images.reverse();
+                }
+                
+                this.updatePageInfo();
+                this.showPage(0);
+                this.preloadImages();
+                
+                if (this.autoHide) {
+                    this.scheduleHideInterface();
+                }
+            }
+
+            showPage(index) {
+                if (index < 0 || index >= this.images.length) return;
+                
+                this.currentPage = index;
+                this.currentImage.src = this.images[index];
+                this.updatePageInfo();
+                this.updateProgress();
+                
+                if (this.isContinuousMode) {
+                    this.updateContinuousMode();
+                }
+            }
+
+            updateContinuousMode() {
+                if (!this.isContinuousMode) return;
+                
+                this.continuousMode.innerHTML = '';
+                this.images.forEach((src, index) => {
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.className = 'manga-image';
+                    img.dataset.index = index;
+                    
+                    // Apply current width settings to new images
+                    if (this.imageScaling) {
+                        img.style.maxWidth = 'none';
+                        img.style.width = '100%';
+                    } else {
+                        img.style.maxWidth = `${this.maxImageWidth}px`;
+                        img.style.width = 'auto';
+                    }
+                    
+                    this.continuousMode.appendChild(img);
+                });
+            }
+
+            updatePageInfo() {
+                this.pageCounter.textContent = `${this.currentPage + 1} / ${this.images.length}`;
+                this.pageSlider.max = this.images.length;
+                this.pageSlider.value = this.currentPage + 1;
+            }
+
+            updateProgress() {
+                const progress = ((this.currentPage + 1) / this.images.length) * 100;
+                this.progressBar.style.width = `${progress}%`;
+            }
+
+            preloadImages() {
+                // Preload next and previous images
+                const preloadIndices = [
+                    this.currentPage - 1,
+                    this.currentPage + 1,
+                    this.currentPage + 2
+                ];
+                
+                preloadIndices.forEach(index => {
+                    if (index >= 0 && index < this.images.length) {
+                        const img = new Image();
+                        img.src = this.images[index];
+                    }
+                });
+            }
+
+            nextPage() {
+                if (this.currentPage < this.images.length - 1) {
+                    this.showPage(this.currentPage + 1);
+                }
+            }
+
+            prevPage() {
+                if (this.currentPage > 0) {
+                    this.showPage(this.currentPage - 1);
+                }
+            }
+
+            goToPage(index) {
+                this.showPage(index);
+            }
+
+            toggleReadingMode() {
+                this.isContinuousMode = !this.isContinuousMode;
+                const btn = document.getElementById('reading-mode-btn');
+                
+                if (this.isContinuousMode) {
+                    this.singlePageMode.style.display = 'none';
+                    this.continuousMode.style.display = 'block';
+                    btn.textContent = 'Continuous';
+                    this.updateContinuousMode();
+                } else {
+                    this.singlePageMode.style.display = 'flex';
+                    this.continuousMode.style.display = 'none';
+                    btn.textContent = 'Single Page';
+                }
+                
+                // Apply current width settings to all images
+                this.updateImageWidths();
+                
+                btn.classList.toggle('active');
+                this.saveSettings();
+            }
+
+            toggleSettings() {
+                this.settingsPanel.classList.toggle('open');
+            }
+
+            toggleFullscreen() {
+                if (!this.isFullscreen) {
+                    if (document.documentElement.requestFullscreen) {
+                        document.documentElement.requestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
+                this.isFullscreen = !this.isFullscreen;
+            }
+
+            goHome() {
+                this.images = [];
+                this.currentPage = 0;
+                this.readerInterface.style.display = 'none';
+                this.loadingScreen.style.display = 'flex';
+                this.bottomControls.classList.add('hidden');
+                this.settingsPanel.classList.remove('open');
+                
+                // Clear inputs
+                document.getElementById('telegraph-url').value = '';
+                document.getElementById('images-url').value = '';
+                document.getElementById('file-input').value = '';
+            }
+
+            handleKeydown(e) {
+                if (this.loadingScreen.style.display !== 'none') return;
+                
+                switch(e.key) {
+                    case 'ArrowRight':
+                    case ' ':
+                        e.preventDefault();
+                        this.nextPage();
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        this.prevPage();
+                        break;
+                    case 'Home':
+                        e.preventDefault();
+                        this.goToPage(0);
+                        break;
+                    case 'End':
+                        e.preventDefault();
+                        this.goToPage(this.images.length - 1);
+                        break;
+                    case 'f':
+                    case 'F':
+                        this.toggleFullscreen();
+                        break;
+                    case 'm':
+                    case 'M':
+                        this.toggleReadingMode();
+                        break;
+                    case 's':
+                    case 'S':
+                        this.toggleSettings();
+                        break;
+                    case 'Escape':
+                        this.settingsPanel.classList.remove('open');
+                        if (this.isFullscreen) {
+                            this.toggleFullscreen();
+                        }
+                        break;
+                }
+            }
+
+            showInterface() {
+                this.header.classList.remove('hidden');
+                if (!this.hideBottomPanel) {
+                    this.bottomControls.classList.remove('hidden');
+                }
+                
+                if (this.autoHide) {
+                    this.scheduleHideInterface();
+                }
+            }
+
+            hideInterface() {
+                if (!this.autoHide) return;
+                this.header.classList.add('hidden');
+            }
+
+            toggleInterface() {
+                if (this.header.classList.contains('hidden')) {
+                    this.showInterface();
+                } else {
+                    this.hideInterface();
+                }
+            }
+
+            scheduleHideInterface() {
+                if (this.hideTimeout) {
+                    clearTimeout(this.hideTimeout);
+                }
+                this.hideTimeout = setTimeout(() => {
+                    this.hideInterface();
+                }, 3000);
+            }
+
+            handleScroll() {
+                if (!this.isContinuousMode) return;
+                
+                const images = this.continuousMode.querySelectorAll('.manga-image');
+                const scrollTop = this.continuousMode.scrollTop;
+                const containerHeight = this.continuousMode.clientHeight;
+                
+                let currentPageFromScroll = 0;
+                images.forEach((img, index) => {
+                    const rect = img.getBoundingClientRect();
+                    const containerRect = this.continuousMode.getBoundingClientRect();
+                    const relativeTop = rect.top - containerRect.top;
+                    
+                    if (relativeTop <= containerHeight / 2) {
+                        currentPageFromScroll = index;
+                    }
+                });
+                
+                if (currentPageFromScroll !== this.currentPage) {
+                    this.currentPage = currentPageFromScroll;
+                    this.updatePageInfo();
+                    this.updateProgress();
+                }
+            }
+
+            // Settings methods
+            toggleContinuousMode() {
+                const toggle = document.getElementById('continuous-toggle');
+                toggle.classList.toggle('active');
+                this.toggleReadingMode();
+            }
+
+            toggleAutoHide() {
+                const toggle = document.getElementById('auto-hide-toggle');
+                toggle.classList.toggle('active');
+                this.autoHide = toggle.classList.contains('active');
+                this.saveSettings();
+            }
+
+            toggleReverseOrder() {
+                const toggle = document.getElementById('reverse-order-toggle');
+                toggle.classList.toggle('active');
+                this.reverseOrder = toggle.classList.contains('active');
+                
+                if (this.images.length > 0) {
+                    this.images.reverse();
+                    this.currentPage = this.images.length - 1 - this.currentPage;
+                    this.showPage(this.currentPage);
+                    if (this.isContinuousMode) {
+                        this.updateContinuousMode();
+                    }
+                }
+                this.saveSettings();
+            }
+
+            toggleClickNav() {
+                const toggle = document.getElementById('click-nav-toggle');
+                toggle.classList.toggle('active');
+                this.clickNav = toggle.classList.contains('active');
+                this.saveSettings();
+            }
+
+            toggleImageScaling() {
+                const toggle = document.getElementById('image-scaling-toggle');
+                toggle.classList.toggle('active');
+                this.imageScaling = toggle.classList.contains('active');
+                this.updateImageWidths();
+                this.saveSettings();
+            }
+
+            toggleBottomPanel() {
+                const toggle = document.getElementById('bottom-panel-toggle');
+                toggle.classList.toggle('active');
+                this.hideBottomPanel = toggle.classList.contains('active');
+                
+                if (this.hideBottomPanel) {
+                    this.bottomControls.classList.add('hidden');
+                } else {
+                    this.bottomControls.classList.remove('hidden');
+                }
+                
+                this.saveSettings();
+            }
+
+            updateImageWidths() {
+                const images = document.querySelectorAll('.manga-image');
+                images.forEach(img => {
+                    if (this.imageScaling) {
+                        img.style.maxWidth = 'none';
+                        img.style.width = '100%';
+                    } else {
+                        img.style.maxWidth = `${this.maxImageWidth}px`;
+                        img.style.width = 'auto';
+                    }
+                });
+            }
+
+            saveSettings() {
+                const settings = {
+                    isContinuousMode: this.isContinuousMode,
+                    autoHide: this.autoHide,
+                    reverseOrder: this.reverseOrder,
+                    clickNav: this.clickNav,
+                    imageScaling: this.imageScaling,
+                    maxImageWidth: this.maxImageWidth,
+                    hideBottomPanel: this.hideBottomPanel
+                };
+                // Note: localStorage not available in Claude.ai artifacts
+                // Settings will reset on page reload
+            }
+
+            loadSettings() {
+                // Note: localStorage not available in Claude.ai artifacts
+                // Using default settings
+                this.updateSettingsUI();
+            }
+
+            updateSettingsUI() {
+                document.getElementById('continuous-toggle').classList.toggle('active', this.isContinuousMode);
+                document.getElementById('auto-hide-toggle').classList.toggle('active', this.autoHide);
+                document.getElementById('reverse-order-toggle').classList.toggle('active', this.reverseOrder);
+                document.getElementById('click-nav-toggle').classList.toggle('active', this.clickNav);
+                document.getElementById('image-scaling-toggle').classList.toggle('active', this.imageScaling);
+                document.getElementById('bottom-panel-toggle').classList.toggle('active', this.hideBottomPanel);
+                document.getElementById('max-width-slider').value = this.maxImageWidth;
+                document.getElementById('width-value').textContent = `${this.maxImageWidth}px`;
+            }
+        }
+
+        // Initialize the manga reader when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.mangaReader = new MangaReader();
+            
+            // Check for Telegraph URL in the path
+            const path = window.location.pathname;
+            if (path && path !== '/') {
+                // Extract slug from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                let slug = path.substring(1); // Remove leading slash
+                
+                // If there's a query parameter, use it instead
+                if (urlParams.has('')) {
+                    slug = urlParams.get('');
+                }
+                
+                // Clean up the slug
+                slug = slug.replace(/^[?/]+/, ''); // Remove leading ? and /
+                
+                if (slug) {
+                    document.getElementById('telegraph-url').value = slug;
+                    window.mangaReader.loadContent();
+                }
             }
         });
 
-        document.querySelector(".overlay-left").addEventListener("click", function(e) {
-            e.stopPropagation();
-            changeImage(-1);
+        // Handle fullscreen changes
+        document.addEventListener('fullscreenchange', () => {
+            if (window.mangaReader) {
+                window.mangaReader.isFullscreen = !!document.fullscreenElement;
+            }
         });
 
-        document.querySelector(".overlay-right").addEventListener("click", function(e) {
-            e.stopPropagation();
-            changeImage(1);
+        // Handle touch gestures for mobile
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
         });
 
-        // Инициализация при загрузке страницы
-        document.addEventListener("DOMContentLoaded", function () {
-            let slug = window.location.search.replace("?", "").trim();
-            loadArticle(slug);
+        document.addEventListener('touchend', (e) => {
+            if (!window.mangaReader || window.mangaReader.loadingScreen.style.display !== 'none') return;
+            
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const diffX = touchEndX - touchStartX;
+            const diffY = touchEndY - touchStartY;
 
-            document.getElementById('show-article')?.addEventListener('click', handleUrlSubmit);
-            document.getElementById('telegraph-url')?.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') handleUrlSubmit();
-            });
+            // Only handle horizontal swipes
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    window.mangaReader.prevPage();
+                } else {
+                    window.mangaReader.nextPage();
+                }
+            }
         });
+
+        // Prevent context menu on images
+        document.addEventListener('contextmenu', (e) => {
+            if (e.target.classList.contains('manga-image')) {
+                e.preventDefault();
+            }
+        });
+
+        // Handle image loading errors
+        document.addEventListener('error', (e) => {
+            if (e.target.classList.contains('manga-image')) {
+                e.target.style.display = 'none';
+                console.error('Failed to load image:', e.target.src);
+            }
+        }, true);
     </script>
 </body>
 </html>
