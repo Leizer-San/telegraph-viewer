@@ -778,7 +778,7 @@
 
                 if (!slug) return;
 
-                slug = slug.replace(/^[/\\?]+/, '').split('?')[0];
+                slug = slug.replace(/?/, '').split('?')[0];
 
                 const pageUrl = `https://telegra.ph/${slug}`;
                 const corsUrl = `https://cors.eu.org/${pageUrl}`;
@@ -1219,7 +1219,7 @@
                 }
                 
                 // Clean up the slug
-                slug = slug.replace(/^[/\\?]+/, '').split('?')[0];
+                slug = slug.replace(/?/, '').split('?')[0];
                 
                 if (slug) {
                     document.getElementById('telegraph-url').value = slug;
