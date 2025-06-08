@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>LeizerManga Reader</title>
+    <title>LeizerGraph</title>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-0RZHNSPH9K"></script>
@@ -14,16 +14,16 @@
       gtag('config', 'G-0RZHNSPH9K');
     </script>
 
-    <meta property="og:title" content="LeizerManga Reader">
+    <meta property="og:title" content="LeizerGraph">
     <meta property="og:description" content="Современный читатель манги с поддержкой Telegraph">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="LeizerManga">
+    <meta property="og:url" content="LeizerGraph">
     <meta property="og:image" content="https://cdn-images.dzcdn.net/images/cover/0f1c81210af1d4270fc7531249e61707/0x1900-000000-80-0-0.jpg">
 
-    <meta name="description" content="LeizerManga Reader — современный читатель манги с поддержкой Telegraph, архивов и различных источников изображений.">
-    <meta name="keywords" content="manga reader, читатель манги, Telegraph manga, онлайн манга, manga viewer, LeizerManga">
+    <meta name="description" content="LeizerGraph — современный читатель манги с поддержкой Telegraph, архивов и различных источников изображений.">
+    <meta name="keywords" content="manga reader, читатель манги, Telegraph manga, онлайн манга, manga viewer, LeizerGraph">
     <meta name="robots" content="index, follow">
-    <meta name="author" content="LeizerManga">
+    <meta name="author" content="LeizerGraph">
 
     <style>
         * {
@@ -76,6 +76,12 @@
             gap: 15px;
             flex: 1;
             justify-content: flex-end;
+        }
+
+        .header-controls .btn {
+            max-width: 160px;
+            min-width: 60px;
+            font-size: 15px;
         }
 
         .btn {
@@ -319,8 +325,9 @@
         }
 
         .control-buttons .btn {
-            min-width: 80px;
+            min-width: 110px;
             max-width: none;
+            font-size: 15px;
         }
 
         /* Settings Panel */
@@ -445,15 +452,28 @@
                 margin-left: auto;
                 width: 100%;
                 justify-content: space-between;
+                flex-wrap: nowrap !important;
             }
 
-            .btn {
-                padding: 6px;
-                font-size: 12px;
-                min-width: 36px;
-                height: 36px;
-                max-width: none;
-                flex: 1;
+            .header-controls .btn {
+                padding: 4px 2px !important;
+                font-size: 11px !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
+                width: 0 !important;
+                height: 34px !important;
+                flex: 1 1 0 !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+                box-sizing: border-box !important;
+            }
+
+            .header-controls .btn-text {
+                display: none !important;
+            }
+            .header-controls .btn-icon {
+                display: inline-block !important;
             }
 
             .btn-text {
@@ -487,7 +507,8 @@
             }
 
             .control-buttons .btn {
-                min-width: 60px;
+                min-width: 80px;
+                font-size: 13px;
             }
         }
 
@@ -595,12 +616,33 @@
                 display: none !important;
             }
         }
+
+        /* Добавляем стили для кнопки языка */
+        .language-btn {
+            min-width: 60px !important;
+        }
+        
+        .language-btn .btn-text {
+            font-weight: bold;
+        }
+
+        .slideshow-settings-panel button.btn {
+            min-width: unset;
+            max-width: unset;
+            width: 100%;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .slideshow-settings-panel label {
+            width: 100%;
+            display: block;
+        }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header class="header" id="header">
-        <div class="logo">LeizerManga Reader</div>
+        <div class="logo">LeizerGraph</div>
         <div class="header-controls">
             <button class="btn" id="settings-btn">
                 <span class="btn-text">Settings</span>
@@ -622,6 +664,10 @@
                 <span class="btn-text">Download</span>
                 <span class="btn-icon">⬇️</span>
             </button>
+            <button class="btn" id="language-btn">
+                <span class="btn-text">RU</span>
+                <span class="btn-icon">🇷🇺</span>
+            </button>
             <button class="btn" id="close-header-btn">
                 <span class="btn-text">Close</span>
                 <span class="btn-icon">❌</span>
@@ -636,7 +682,7 @@
     <main class="main-content">
         <!-- Loading Screen -->
         <div class="loading-screen" id="loading-screen">
-            <h1>LeizerManga Reader</h1>
+            <h1>LeizerGraph</h1>
             <div class="input-section">
                 <div class="input-group">
                     <label for="telegraph-url">Telegraph URL</label>
@@ -770,7 +816,7 @@
                 this.isContinuousMode = false;
                 this.reverseOrder = false;
                 this.clickNav = true;
-                this.imageScaling = this.isMobileDevice(); // Enable scaling by default on mobile
+                this.imageScaling = this.isMobileDevice();
                 this.maxImageWidth = 1000;
                 this.hideBottomPanel = false;
                 this.isSettingsOpen = false;
@@ -786,7 +832,120 @@
                 this.slideshowIntervalValueSpan = null;
                 this.wasContinuousBeforeSlideshow = false;
                 this.invertedControls = false;
-                this.mangaTitle = 'manga_images'; // Добавляем свойство для хранения названия
+                this.mangaTitle = 'manga_images';
+                this.currentLanguage = localStorage.getItem('mangaReaderLanguage') || 'ru';
+                
+                // Объект с переводами
+                this.translations = {
+                    ru: {
+                        title: 'LeizerGraph',
+                        description: 'Современный читатель манги с поддержкой Telegraph',
+                        keywords: 'читатель манги, Telegraph manga, онлайн манга, manga viewer, LeizerGraph',
+                        author: 'LeizerGraph',
+                        settings: 'Настройки',
+                        fullscreen: 'На весь экран',
+                        home: 'Домой',
+                        slideshow: 'Слайдшоу',
+                        download: 'Скачать',
+                        close: 'Закрыть',
+                        telegraphUrl: 'URL Telegraph',
+                        telegraphUrlPlaceholder: 'https://telegra.ph/example или просто example',
+                        imagesUrl: 'Прямые ссылки на изображения',
+                        imagesUrlPlaceholder: 'Введите ссылки на изображения, каждую с новой строки',
+                        fileInput: 'Загрузить архив или изображения',
+                        fileInputLabel: 'Выберите файлы (ZIP, RAR, CBZ, CBR или изображения)',
+                        load: 'Загрузить',
+                        prev: 'Назад',
+                        next: 'Вперед',
+                        readingMode: 'Режим чтения',
+                        continuousScroll: 'Непрерывная прокрутка',
+                        navigation: 'Навигация',
+                        reverseOrder: 'Обратный порядок страниц',
+                        clickToNavigate: 'Клик для перехода',
+                        invertedControls: 'Инвертированное управление',
+                        display: 'Отображение',
+                        imageScaling: 'Масштабирование изображений',
+                        hideBottomPanel: 'Скрыть нижнюю панель',
+                        maxImageWidth: 'Максимальная ширина изображений',
+                        slideshowSettings: 'Настройки слайдшоу',
+                        interval: 'Интервал (сек):',
+                        repeat: 'Повторять',
+                        startFromCurrent: 'Начать с текущей страницы',
+                        startSlideshow: 'Начать слайдшоу',
+                        stopSlideshow: 'Остановить слайдшоу',
+                        noImages: 'Нет изображений для скачивания',
+                        downloading: 'Скачивание:',
+                        downloadError: 'Не удалось скачать ни одного изображения',
+                        archiveError: 'Произошла ошибка при создании архива',
+                        telegraphError: 'Ошибка загрузки статьи Telegraph',
+                        telegraphLoadError: 'Ошибка загрузки Telegraph:',
+                        zipError: 'Ошибка загрузки архива',
+                        zipLoadError: 'Ошибка загрузки ZIP:',
+                        pleaseEnterUrl: 'Пожалуйста, введите URL Telegraph, ссылки на изображения или выберите файлы',
+                        imageLoadError: 'Ошибка загрузки изображения:',
+                        widthValue: 'пикс',
+                        slideshowStart: 'Начать слайдшоу',
+                        slideshowStop: 'Остановить слайдшоу',
+                        slideshowStartFromCurrent: 'Начать с текущей страницы',
+                        slideshowRepeat: 'Повторять',
+                        slideshowInterval: 'Интервал (сек):',
+                        slideshowSettings: 'Настройки слайдшоу',
+                    },
+                    en: {
+                        title: 'LeizerGraph',
+                        description: 'Modern manga reader with Telegraph support',
+                        keywords: 'manga reader, Telegraph manga, online manga, manga viewer, LeizerGraph',
+                        author: 'LeizerGraph',
+                        settings: 'Settings',
+                        fullscreen: 'Fullscreen',
+                        home: 'Home',
+                        slideshow: 'Slideshow',
+                        download: 'Download',
+                        close: 'Close',
+                        telegraphUrl: 'Telegraph URL',
+                        telegraphUrlPlaceholder: 'https://telegra.ph/example or just example',
+                        imagesUrl: 'Direct Image Links',
+                        imagesUrlPlaceholder: 'Enter image links, one per line',
+                        fileInput: 'Upload Archive or Images',
+                        fileInputLabel: 'Choose files (ZIP, RAR, CBZ, CBR or images)',
+                        load: 'Load',
+                        prev: 'Prev',
+                        next: 'Next',
+                        readingMode: 'Reading Mode',
+                        continuousScroll: 'Continuous Scroll',
+                        navigation: 'Navigation',
+                        reverseOrder: 'Reverse Page Order',
+                        clickToNavigate: 'Click to Navigate',
+                        invertedControls: 'Inverted Controls',
+                        display: 'Display',
+                        imageScaling: 'Image Scaling',
+                        hideBottomPanel: 'Hide Bottom Panel',
+                        maxImageWidth: 'Maximum Image Width',
+                        slideshowSettings: 'Slideshow Settings',
+                        interval: 'Interval (sec):',
+                        repeat: 'Repeat',
+                        startFromCurrent: 'Start from current page',
+                        startSlideshow: 'Start Slideshow',
+                        stopSlideshow: 'Stop Slideshow',
+                        noImages: 'No images to download',
+                        downloading: 'Downloading:',
+                        downloadError: 'Failed to download any images',
+                        archiveError: 'Error creating archive',
+                        telegraphError: 'Error loading Telegraph article',
+                        telegraphLoadError: 'Error loading Telegraph:',
+                        zipError: 'Error loading archive',
+                        zipLoadError: 'Error loading ZIP:',
+                        pleaseEnterUrl: 'Please enter Telegraph URL, image links or select files',
+                        imageLoadError: 'Error loading image:',
+                        widthValue: 'px',
+                        slideshowStart: 'Start Slideshow',
+                        slideshowStop: 'Stop Slideshow',
+                        slideshowStartFromCurrent: 'Start from current page',
+                        slideshowRepeat: 'Repeat',
+                        slideshowInterval: 'Interval (sec):',
+                        slideshowSettings: 'Slideshow Settings',
+                    }
+                };
                 
                 this.initElements();
                 this.bindEvents();
@@ -794,6 +953,7 @@
                 this.checkUrlParams();
                 this.initMenuIcon();
                 this.loadSlideshowSettings();
+                this.updateLanguage();
                 
                 // Показываем интерфейс при старте
                 this.showInterface();
@@ -851,7 +1011,8 @@
                 // Width slider
                 document.getElementById('max-width-slider').addEventListener('input', (e) => {
                     this.maxImageWidth = parseInt(e.target.value);
-                    document.getElementById('width-value').textContent = `${this.maxImageWidth}px`;
+                    const t = this.translations[this.currentLanguage];
+                    document.getElementById('width-value').textContent = `${this.maxImageWidth}${t.widthValue}`;
                     this.updateImageWidths();
                     this.saveSettings();
                 });
@@ -891,6 +1052,9 @@
                 this.slideshowIntervalInput.addEventListener('input', () => {
                     this.slideshowIntervalSec = parseFloat(this.slideshowIntervalInput.value) || 2.5;
                     this.slideshowIntervalValueSpan.textContent = this.slideshowIntervalSec;
+                    // Также обновим span в label, если он есть
+                    const span = document.getElementById('slideshow-interval-value');
+                    if (span) span.textContent = this.slideshowIntervalSec;
                     this.saveSlideshowSettings();
                 });
                 this.slideshowRepeatInput.addEventListener('change', () => {
@@ -941,6 +1105,14 @@
 
                 // Scroll handling for continuous mode
                 this.continuousMode.addEventListener('scroll', () => this.handleScroll());
+
+                // Добавляем обработчик для кнопки языка
+                document.getElementById('language-btn').addEventListener('click', () => this.toggleLanguage());
+
+                // Обновлять навигацию при изменении размера окна
+                window.addEventListener('resize', () => {
+                    this.updateTranslations();
+                });
             }
 
             async loadContent() {
@@ -955,7 +1127,7 @@
                 } else if (fileInput.files.length > 0) {
                     await this.loadFiles(fileInput.files);
                 } else {
-                    alert('Пожалуйста, введите URL Telegraph, ссылки на изображения или выберите файлы');
+                    alert(this.translations[this.currentLanguage].pleaseEnterUrl);
                     return;
                 }
 
@@ -986,7 +1158,6 @@
                     const article = doc.querySelector("article");
 
                     if (article) {
-                        // Получаем заголовок статьи
                         const title = article.querySelector("h1");
                         if (title) {
                             this.mangaTitle = title.textContent.trim();
@@ -998,8 +1169,8 @@
                         this.images = Array.from(images).map(img => img.src);
                     }
                 } catch (error) {
-                    console.error("Ошибка загрузки Telegraph:", error);
-                    alert("Ошибка загрузки статьи Telegraph");
+                    console.error(this.translations[this.currentLanguage].telegraphLoadError, error);
+                    alert(this.translations[this.currentLanguage].telegraphError);
                 }
             }
 
@@ -1041,7 +1212,6 @@
                         }
                     });
 
-                    // Sort files naturally
                     imageFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}));
 
                     for (const fileInfo of imageFiles) {
@@ -1050,8 +1220,8 @@
                         this.images.push(url);
                     }
                 } catch (error) {
-                    console.error("Ошибка загрузки ZIP:", error);
-                    alert("Ошибка загрузки архива");
+                    console.error(this.translations[this.currentLanguage].zipLoadError, error);
+                    alert(this.translations[this.currentLanguage].zipError);
                 }
             }
 
@@ -1085,22 +1255,19 @@
                 
                 this.currentPage = index;
                 
-                // Добавляем обработчик загрузки изображения
                 this.currentImage.onload = () => {
                     this.currentImage.style.display = 'block';
-                    this.updateImageWidths(); // Apply scaling after image loads
+                    this.updateImageWidths();
                 };
                 
                 this.currentImage.onerror = () => {
-                    console.error('Ошибка загрузки изображения:', this.images[index]);
+                    console.error(this.translations[this.currentLanguage].imageLoadError, this.images[index]);
                     this.currentImage.style.display = 'none';
-                    // Пробуем загрузить следующее изображение
                     if (index < this.images.length - 1) {
                         this.nextPage();
                     }
                 };
                 
-                // Скрываем изображение перед загрузкой нового
                 this.currentImage.style.display = 'none';
                 this.currentImage.src = this.images[index];
                 
@@ -1360,11 +1527,20 @@
                 if (!this.hideBottomPanel) {
                     this.bottomControls.classList.remove('hidden');
                 }
+                // Если открыты настройки, header всегда видим
+                if (this.isSettingsOpen) {
+                    this.header.classList.add('visible');
+                    this.menuIcon.style.display = 'none';
+                }
             }
 
             hideInterface() {
-                if (this.isSettingsOpen) return;
-                
+                if (this.isSettingsOpen) {
+                    // Не скрываем header, если открыты настройки
+                    this.header.classList.add('visible');
+                    this.menuIcon.style.display = 'none';
+                    return;
+                }
                 this.header.classList.remove('visible');
                 this.menuIcon.style.display = 'flex';
             }
@@ -1477,6 +1653,8 @@
             updateImageWidths() {
                 const images = document.querySelectorAll('.manga-image');
                 const isMobile = window.innerHeight > window.innerWidth;
+                const t = this.translations[this.currentLanguage];
+                
                 images.forEach(img => {
                     if (this.imageScaling) {
                         if (isMobile) {
@@ -1497,6 +1675,9 @@
                         img.style.height = 'auto';
                     }
                 });
+                
+                // Обновляем отображение значения ширины
+                document.getElementById('width-value').textContent = `${this.maxImageWidth}${t.widthValue}`;
             }
 
             saveSettings() {
@@ -1629,13 +1810,14 @@
             }
 
             updateSlideshowStartStopBtn() {
+                const t = this.translations[this.currentLanguage];
                 if (this.isSlideshowActive) {
-                    this.slideshowStartStopBtn.textContent = 'Stop Slideshow';
-                    this.slideshowBtn.querySelector('.btn-text').textContent = 'Stop';
+                    this.slideshowStartStopBtn.textContent = t.slideshowStop;
+                    this.slideshowBtn.querySelector('.btn-text').textContent = t.slideshowStop;
                     this.slideshowBtn.querySelector('.btn-icon').textContent = '⏹️';
                 } else {
-                    this.slideshowStartStopBtn.textContent = 'Start Slideshow';
-                    this.slideshowBtn.querySelector('.btn-text').textContent = 'Slideshow';
+                    this.slideshowStartStopBtn.textContent = t.slideshowStart;
+                    this.slideshowBtn.querySelector('.btn-text').textContent = t.slideshow;
                     this.slideshowBtn.querySelector('.btn-icon').textContent = '▶️';
                 }
             }
@@ -1714,7 +1896,7 @@
 
             async downloadImagesAsZip() {
                 if (this.images.length === 0) {
-                    alert('Нет изображений для скачивания');
+                    alert(this.translations[this.currentLanguage].noImages);
                     return;
                 }
 
@@ -1760,7 +1942,7 @@
                             processedImages++;
                             const progress = (processedImages / totalImages) * 100;
                             progressBar.style.width = `${progress}%`;
-                            progressText.textContent = `Скачивание: ${processedImages}/${totalImages}`;
+                            progressText.textContent = `${this.translations[this.currentLanguage].downloading} ${processedImages}/${totalImages}`;
                         } catch (error) {
                             console.error(`Ошибка при скачивании изображения ${i + 1}:`, error);
                         }
@@ -1783,7 +1965,7 @@
 
                         URL.revokeObjectURL(url);
                     } else {
-                        alert('Не удалось скачать ни одного изображения');
+                        alert(this.translations[this.currentLanguage].downloadError);
                     }
 
                     // Удаляем прогресс-бар и текст
@@ -1791,7 +1973,110 @@
                     document.body.removeChild(progressText);
                 } catch (error) {
                     console.error('Ошибка при создании архива:', error);
-                    alert('Произошла ошибка при создании архива');
+                    alert(this.translations[this.currentLanguage].archiveError);
+                }
+            }
+
+            // Добавляем методы для работы с языком
+            updateLanguage() {
+                const languageBtn = document.getElementById('language-btn');
+                const btnText = languageBtn.querySelector('.btn-text');
+                const btnIcon = languageBtn.querySelector('.btn-icon');
+                
+                if (this.currentLanguage === 'ru') {
+                    btnText.textContent = 'RU';
+                    btnIcon.textContent = '🇷🇺';
+                } else {
+                    btnText.textContent = 'EN';
+                    btnIcon.textContent = '🇬🇧';
+                }
+                
+                this.updateTranslations();
+            }
+
+            toggleLanguage() {
+                this.currentLanguage = this.currentLanguage === 'ru' ? 'en' : 'ru';
+                localStorage.setItem('mangaReaderLanguage', this.currentLanguage);
+                this.updateLanguage();
+            }
+
+            updateTranslations() {
+                const t = this.translations[this.currentLanguage];
+                // ... мета-теги и заголовок ...
+                document.title = t.title;
+                document.querySelector('meta[property="og:title"]').setAttribute('content', t.title);
+                document.querySelector('meta[property="og:description"]').setAttribute('content', t.description);
+                document.querySelector('meta[name="description"]').setAttribute('content', t.description);
+                document.querySelector('meta[name="keywords"]').setAttribute('content', t.keywords);
+                document.querySelector('meta[name="author"]').setAttribute('content', t.author);
+                document.querySelector('.loading-screen h1').textContent = t.title;
+                // Кнопки в header
+                document.getElementById('settings-btn').querySelector('.btn-text').textContent = t.settings;
+                document.getElementById('fullscreen-btn').querySelector('.btn-text').textContent = t.fullscreen;
+                document.getElementById('home-btn').querySelector('.btn-text').textContent = t.home;
+                document.getElementById('slideshow-btn').querySelector('.btn-text').textContent = t.slideshow;
+                document.getElementById('download-btn').querySelector('.btn-text').textContent = t.download;
+                document.getElementById('close-header-btn').querySelector('.btn-text').textContent = t.close;
+                // Навигация
+                if (window.innerWidth <= 768 || window.innerHeight > window.innerWidth) {
+                    document.getElementById('prev-btn').textContent = '⬅️';
+                    document.getElementById('next-btn').textContent = '➡️';
+                } else {
+                    document.getElementById('prev-btn').textContent = `‹ ${t.prev}`;
+                    document.getElementById('next-btn').textContent = `${t.next} ›`;
+                }
+                // Поля ввода
+                document.querySelector('label[for="telegraph-url"]').textContent = t.telegraphUrl;
+                document.getElementById('telegraph-url').placeholder = t.telegraphUrlPlaceholder;
+                document.querySelector('label[for="images-url"]').textContent = t.imagesUrl;
+                document.getElementById('images-url').placeholder = t.imagesUrlPlaceholder;
+                document.querySelector('label[for="file-input"]').textContent = t.fileInput;
+                document.querySelector('.file-label').textContent = t.fileInputLabel;
+                document.getElementById('load-btn').textContent = t.load;
+                // --- Настройки ---
+                // Заголовки групп
+                const groupTitles = [t.readingMode, t.navigation, t.display];
+                document.querySelectorAll('.settings-group h3').forEach((el, i) => { el.textContent = groupTitles[i] || ''; });
+                // Пункты групп
+                const groupLabels = [
+                    [t.continuousScroll],
+                    [t.reverseOrder, t.clickToNavigate, t.invertedControls],
+                    [t.imageScaling, t.hideBottomPanel, t.maxImageWidth]
+                ];
+                document.querySelectorAll('.settings-group').forEach((group, i) => {
+                    const labels = group.querySelectorAll('.setting-item label');
+                    groupLabels[i]?.forEach((text, j) => {
+                        if (labels[j]) labels[j].textContent = text;
+                    });
+                });
+                // Значение ширины
+                document.getElementById('width-value').textContent = `${this.maxImageWidth}${t.widthValue}`;
+                // --- Окно слайдшоу ---
+                document.querySelector('.slideshow-settings-panel > div:first-child').textContent = t.slideshowSettings;
+                document.querySelector('label[for="slideshow-interval"]').innerHTML = `${t.slideshowInterval} <span id="slideshow-interval-value">${this.slideshowIntervalSec}</span>`;
+                // Исправляем перевод чекбоксов с input внутри label
+                document.getElementById('slideshow-repeat').parentElement.innerHTML = `<input type="checkbox" id="slideshow-repeat"> ${t.slideshowRepeat}`;
+                document.getElementById('slideshow-from-current').parentElement.innerHTML = `<input type="checkbox" id="slideshow-from-current"> ${t.slideshowStartFromCurrent}`;
+                // Восстанавливаем состояние чекбоксов после перерисовки
+                document.getElementById('slideshow-repeat').checked = this.slideshowRepeat;
+                document.getElementById('slideshow-from-current').checked = this.slideshowFromCurrent;
+                // Восстанавливаем обработчики
+                document.getElementById('slideshow-repeat').addEventListener('change', () => {
+                    this.slideshowRepeat = document.getElementById('slideshow-repeat').checked;
+                    this.saveSlideshowSettings();
+                });
+                document.getElementById('slideshow-from-current').addEventListener('change', () => {
+                    this.slideshowFromCurrent = document.getElementById('slideshow-from-current').checked;
+                    this.saveSlideshowSettings();
+                });
+                document.getElementById('slideshow-settings-close').textContent = t.close;
+                // Кнопка старт/стоп слайдшоу
+                if (this.isSlideshowActive) {
+                    this.slideshowStartStopBtn.textContent = t.slideshowStop;
+                    this.slideshowBtn.querySelector('.btn-text').textContent = t.slideshowStop;
+                } else {
+                    this.slideshowStartStopBtn.textContent = t.slideshowStart;
+                    this.slideshowBtn.querySelector('.btn-text').textContent = t.slideshow;
                 }
             }
         }
