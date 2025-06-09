@@ -308,15 +308,43 @@
             border-radius: 3px;
             outline: none;
             cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         .page-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
             appearance: none;
             width: 18px;
             height: 18px;
             background: #007acc;
             border-radius: 50%;
             cursor: pointer;
+            border: none;
+        }
+
+        .page-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #007acc;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .page-slider:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-slider:disabled::-webkit-slider-thumb {
+            background: #555;
+            cursor: not-allowed;
+        }
+
+        .page-slider:disabled::-moz-range-thumb {
+            background: #555;
+            cursor: not-allowed;
         }
 
         .control-buttons {
@@ -410,16 +438,43 @@
             border-radius: 3px;
             outline: none;
             cursor: pointer;
-            margin-top: 8px;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         .width-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
             appearance: none;
             width: 18px;
             height: 18px;
             background: #007acc;
             border-radius: 50%;
             cursor: pointer;
+            border: none;
+        }
+
+        .width-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #007acc;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .width-slider:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .width-slider:disabled::-webkit-slider-thumb {
+            background: #555;
+            cursor: not-allowed;
+        }
+
+        .width-slider:disabled::-moz-range-thumb {
+            background: #555;
+            cursor: not-allowed;
         }
 
         .width-value {
@@ -427,6 +482,11 @@
             font-size: 12px;
             margin-top: 4px;
             text-align: right;
+            transition: opacity 0.3s ease;
+        }
+
+        .width-value.disabled {
+            opacity: 0.5;
         }
 
         /* Fullscreen styles */
@@ -1589,8 +1649,16 @@
 
             toggleImageScaling() {
                 const toggle = document.getElementById('image-scaling-toggle');
+                const widthSlider = document.getElementById('max-width-slider');
+                const widthValue = document.getElementById('width-value');
+                
                 toggle.classList.toggle('active');
                 this.imageScaling = toggle.classList.contains('active');
+                
+                // Обновляем состояние слайдера
+                widthSlider.disabled = this.imageScaling;
+                widthValue.classList.toggle('disabled', this.imageScaling);
+                
                 this.updateImageWidths();
                 this.saveSettings();
             }
@@ -1866,12 +1934,9 @@
                 widthSlider.value = this.maxImageWidth;
                 widthValue.textContent = `${this.maxImageWidth}${this.translations[this.currentLanguage].widthValue}`;
                 
-                // Активируем слайдер ширины если не в режиме масштабирования
-                if (!this.imageScaling) {
-                    widthSlider.disabled = false;
-                    widthSlider.style.opacity = '1';
-                    widthValue.style.opacity = '1';
-                }
+                // Обновляем состояние слайдера
+                widthSlider.disabled = this.imageScaling;
+                widthValue.classList.toggle('disabled', this.imageScaling);
                 
                 // Обновляем отображение изображений
                 this.updateImageWidths();
