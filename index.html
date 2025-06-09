@@ -637,43 +637,6 @@
             width: 100%;
             display: block;
         }
-
-        /* Кроссбраузерные стили для слайдеров и чекбоксов */
-        input[type="range"]::-webkit-slider-thumb {
-            background: #007acc;
-        }
-        input[type="range"]::-webkit-slider-runnable-track {
-            background: #333;
-        }
-        input[type="range"]::-moz-range-thumb {
-            background: #007acc;
-        }
-        input[type="range"]::-moz-range-track {
-            background: #333;
-        }
-        input[type="range"]::-ms-thumb {
-            background: #007acc;
-        }
-        input[type="range"]::-ms-fill-lower {
-            background: #007acc;
-        }
-        input[type="range"]::-ms-fill-upper {
-            background: #333;
-        }
-        input[type="range"]:focus::-ms-fill-lower {
-            background: #007acc;
-        }
-        input[type="range"]:focus::-ms-fill-upper {
-            background: #333;
-        }
-        input[type="range"] {
-            accent-color: #007acc;
-        }
-        input[type="checkbox"] {
-            accent-color: #007acc;
-            width: 18px;
-            height: 18px;
-        }
     </style>
 </head>
 <body>
@@ -1895,20 +1858,9 @@
                 this.maxImageWidth = this.previousMaxWidth;
                 
                 // Обновляем UI в соответствии с восстановленными настройками
-                const scalingToggle = document.getElementById('image-scaling-toggle');
-                const widthSlider = document.getElementById('max-width-slider');
-                const widthValue = document.getElementById('width-value');
-                
-                scalingToggle.classList.toggle('active', this.imageScaling);
-                widthSlider.value = this.maxImageWidth;
-                widthValue.textContent = `${this.maxImageWidth}${this.translations[this.currentLanguage].widthValue}`;
-                
-                // Активируем слайдер ширины если не в режиме масштабирования
-                if (!this.imageScaling) {
-                    widthSlider.disabled = false;
-                    widthSlider.style.opacity = '1';
-                    widthValue.style.opacity = '1';
-                }
+                document.getElementById('image-scaling-toggle').classList.toggle('active', this.imageScaling);
+                document.getElementById('max-width-slider').value = this.maxImageWidth;
+                document.getElementById('width-value').textContent = `${this.maxImageWidth}${this.translations[this.currentLanguage].widthValue}`;
                 
                 // Обновляем отображение изображений
                 this.updateImageWidths();
