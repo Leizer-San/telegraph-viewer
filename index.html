@@ -1063,8 +1063,8 @@
                 // Mouse/touch events for interface visibility - only for desktop
                 if (!this.isMobileDevice()) {
                     document.addEventListener('mousemove', (e) => {
-                        // Show interface when mouse is near the top or bottom
-                        if (e.clientY < 60 || e.clientY > window.innerHeight - 60) {
+                        // Show interface only when mouse is near the top
+                        if (e.clientY < 60) {
                             this.showInterface();
                         } else {
                             this.hideInterface();
