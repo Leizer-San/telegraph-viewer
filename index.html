@@ -644,17 +644,9 @@
     <header class="header" id="header">
         <div class="logo">LeizerGraph</div>
         <div class="header-controls">
-            <button class="btn" id="settings-btn">
-                <span class="btn-text">Settings</span>
-                <span class="btn-icon">⚙️</span>
-            </button>
             <button class="btn" id="fullscreen-btn">
                 <span class="btn-text">Fullscreen</span>
                 <span class="btn-icon">⛶</span>
-            </button>
-            <button class="btn" id="home-btn">
-                <span class="btn-text">Home</span>
-                <span class="btn-icon">🏠</span>
             </button>
             <button class="btn" id="slideshow-btn">
                 <span class="btn-text">Slideshow</span>
@@ -664,9 +656,17 @@
                 <span class="btn-text">Download</span>
                 <span class="btn-icon">⬇️</span>
             </button>
+            <button class="btn" id="settings-btn">
+                <span class="btn-text">Settings</span>
+                <span class="btn-icon">⚙️</span>
+            </button>
             <button class="btn" id="language-btn">
                 <span class="btn-text">RU</span>
                 <span class="btn-icon">🇷🇺</span>
+            </button>
+            <button class="btn" id="home-btn">
+                <span class="btn-text">Home</span>
+                <span class="btn-icon">🏠</span>
             </button>
             <button class="btn" id="close-header-btn">
                 <span class="btn-text">Close</span>
@@ -689,11 +689,6 @@
                     <input type="text" id="telegraph-url" class="input-field" placeholder="https://telegra.ph/example или просто example">
                 </div>
                 
-                <div class="input-group">
-                    <label for="images-url">Прямые ссылки на изображения</label>
-                    <textarea id="images-url" class="input-field" rows="4" placeholder="Введите ссылки на изображения, каждую с новой строки"></textarea>
-                </div>
-
                 <div class="input-group">
                     <label for="file-input">Загрузить архив или изображения</label>
                     <input type="file" id="file-input" class="file-input" multiple accept=".zip,.rar,.cbz,.cbr,image/*">
@@ -850,8 +845,6 @@
                         close: 'Закрыть',
                         telegraphUrl: 'URL Telegraph',
                         telegraphUrlPlaceholder: 'https://telegra.ph/example или просто example',
-                        imagesUrl: 'Прямые ссылки на изображения',
-                        imagesUrlPlaceholder: 'Введите ссылки на изображения, каждую с новой строки',
                         fileInput: 'Загрузить архив или изображения',
                         fileInputLabel: 'Выберите файлы (ZIP, RAR, CBZ, CBR или изображения)',
                         load: 'Загрузить',
@@ -881,7 +874,7 @@
                         telegraphLoadError: 'Ошибка загрузки Telegraph:',
                         zipError: 'Ошибка загрузки архива',
                         zipLoadError: 'Ошибка загрузки ZIP:',
-                        pleaseEnterUrl: 'Пожалуйста, введите URL Telegraph, ссылки на изображения или выберите файлы',
+                        pleaseEnterUrl: 'Пожалуйста, введите URL Telegraph или выберите файлы',
                         imageLoadError: 'Ошибка загрузки изображения:',
                         widthValue: 'пикс',
                         slideshowStart: 'Начать слайдшоу',
@@ -904,8 +897,6 @@
                         close: 'Close',
                         telegraphUrl: 'Telegraph URL',
                         telegraphUrlPlaceholder: 'https://telegra.ph/example or just example',
-                        imagesUrl: 'Direct Image Links',
-                        imagesUrlPlaceholder: 'Enter image links, one per line',
                         fileInput: 'Upload Archive or Images',
                         fileInputLabel: 'Choose files (ZIP, RAR, CBZ, CBR or images)',
                         load: 'Load',
@@ -935,7 +926,7 @@
                         telegraphLoadError: 'Error loading Telegraph:',
                         zipError: 'Error loading archive',
                         zipLoadError: 'Error loading ZIP:',
-                        pleaseEnterUrl: 'Please enter Telegraph URL, image links or select files',
+                        pleaseEnterUrl: 'Please enter Telegraph URL or select files',
                         imageLoadError: 'Error loading image:',
                         widthValue: 'px',
                         slideshowStart: 'Start Slideshow',
@@ -1117,13 +1108,10 @@
 
             async loadContent() {
                 const telegraphUrl = document.getElementById('telegraph-url').value.trim();
-                const imagesUrl = document.getElementById('images-url').value.trim();
                 const fileInput = document.getElementById('file-input');
 
                 if (telegraphUrl) {
                     await this.loadTelegraph(telegraphUrl);
-                } else if (imagesUrl) {
-                    this.loadImageUrls(imagesUrl);
                 } else if (fileInput.files.length > 0) {
                     await this.loadFiles(fileInput.files);
                 } else {
@@ -1172,14 +1160,6 @@
                     console.error(this.translations[this.currentLanguage].telegraphLoadError, error);
                     alert(this.translations[this.currentLanguage].telegraphError);
                 }
-            }
-
-            loadImageUrls(urls) {
-                this.images = urls.split('\n')
-                    .map(url => url.trim())
-                    .filter(url => url && (url.startsWith('http') || url.startsWith('data:')));
-                // Устанавливаем название по умолчанию для прямых ссылок
-                this.mangaTitle = 'direct_images';
             }
 
             async loadFiles(files) {
@@ -1860,17 +1840,44 @@
                     this.slideshowInterval = null;
                 }
                 this.hideSlideshowSettings();
-                // Если до слайдшоу был continuous-режим, возвращаем его
+                
+                // Восстанавливаем все настройки
                 if (this.wasContinuousBeforeSlideshow) {
                     this.isContinuousMode = true;
                     this.singlePageMode.style.display = 'none';
                     this.continuousMode.style.display = 'block';
                     this.updateContinuousMode();
-                    this.updateImageWidths();
-                    this.wasContinuousBeforeSlideshow = false;
+                } else {
+                    this.isContinuousMode = false;
+                    this.singlePageMode.style.display = 'flex';
+                    this.continuousMode.style.display = 'none';
                 }
-                // Восстанавливаем настройки ширины
-                this.restoreWidthSettings();
+                
+                // Восстанавливаем настройки масштабирования и ширины
+                this.imageScaling = this.previousScalingState;
+                this.maxImageWidth = this.previousMaxWidth;
+                
+                // Обновляем UI в соответствии с восстановленными настройками
+                const scalingToggle = document.getElementById('image-scaling-toggle');
+                const widthSlider = document.getElementById('max-width-slider');
+                const widthValue = document.getElementById('width-value');
+                
+                scalingToggle.classList.toggle('active', this.imageScaling);
+                widthSlider.value = this.maxImageWidth;
+                widthValue.textContent = `${this.maxImageWidth}${this.translations[this.currentLanguage].widthValue}`;
+                
+                // Активируем слайдер ширины если не в режиме масштабирования
+                if (!this.imageScaling) {
+                    widthSlider.disabled = false;
+                    widthSlider.style.opacity = '1';
+                    widthValue.style.opacity = '1';
+                }
+                
+                // Обновляем отображение изображений
+                this.updateImageWidths();
+                
+                // Сбрасываем флаг
+                this.wasContinuousBeforeSlideshow = false;
             }
 
             saveSlideshowSettings() {
@@ -2010,6 +2017,7 @@
                 document.querySelector('meta[name="keywords"]').setAttribute('content', t.keywords);
                 document.querySelector('meta[name="author"]').setAttribute('content', t.author);
                 document.querySelector('.loading-screen h1').textContent = t.title;
+                
                 // Кнопки в header
                 document.getElementById('settings-btn').querySelector('.btn-text').textContent = t.settings;
                 document.getElementById('fullscreen-btn').querySelector('.btn-text').textContent = t.fullscreen;
@@ -2017,6 +2025,7 @@
                 document.getElementById('slideshow-btn').querySelector('.btn-text').textContent = t.slideshow;
                 document.getElementById('download-btn').querySelector('.btn-text').textContent = t.download;
                 document.getElementById('close-header-btn').querySelector('.btn-text').textContent = t.close;
+                
                 // Навигация
                 if (window.innerWidth <= 768 || window.innerHeight > window.innerWidth) {
                     document.getElementById('prev-btn').textContent = '⬅️';
@@ -2025,59 +2034,65 @@
                     document.getElementById('prev-btn').textContent = `‹ ${t.prev}`;
                     document.getElementById('next-btn').textContent = `${t.next} ›`;
                 }
+                
                 // Поля ввода
                 document.querySelector('label[for="telegraph-url"]').textContent = t.telegraphUrl;
                 document.getElementById('telegraph-url').placeholder = t.telegraphUrlPlaceholder;
-                document.querySelector('label[for="images-url"]').textContent = t.imagesUrl;
-                document.getElementById('images-url').placeholder = t.imagesUrlPlaceholder;
                 document.querySelector('label[for="file-input"]').textContent = t.fileInput;
                 document.querySelector('.file-label').textContent = t.fileInputLabel;
                 document.getElementById('load-btn').textContent = t.load;
+                
                 // --- Настройки ---
                 // Заголовки групп
                 const groupTitles = [t.readingMode, t.navigation, t.display];
                 document.querySelectorAll('.settings-group h3').forEach((el, i) => { el.textContent = groupTitles[i] || ''; });
+                
                 // Пункты групп
                 const groupLabels = [
                     [t.continuousScroll],
                     [t.reverseOrder, t.clickToNavigate, t.invertedControls],
                     [t.imageScaling, t.hideBottomPanel, t.maxImageWidth]
                 ];
+                
                 document.querySelectorAll('.settings-group').forEach((group, i) => {
                     const labels = group.querySelectorAll('.setting-item label');
                     groupLabels[i]?.forEach((text, j) => {
                         if (labels[j]) labels[j].textContent = text;
                     });
                 });
+                
                 // Значение ширины
                 document.getElementById('width-value').textContent = `${this.maxImageWidth}${t.widthValue}`;
+                
                 // --- Окно слайдшоу ---
                 document.querySelector('.slideshow-settings-panel > div:first-child').textContent = t.slideshowSettings;
                 document.querySelector('label[for="slideshow-interval"]').innerHTML = `${t.slideshowInterval} <span id="slideshow-interval-value">${this.slideshowIntervalSec}</span>`;
-                // Исправляем перевод чекбоксов с input внутри label
-                document.getElementById('slideshow-repeat').parentElement.innerHTML = `<input type="checkbox" id="slideshow-repeat"> ${t.slideshowRepeat}`;
-                document.getElementById('slideshow-from-current').parentElement.innerHTML = `<input type="checkbox" id="slideshow-from-current"> ${t.slideshowStartFromCurrent}`;
-                // Восстанавливаем состояние чекбоксов после перерисовки
+                
+                // Чекбоксы слайдшоу
+                const repeatCheckbox = document.getElementById('slideshow-repeat');
+                const fromCurrentCheckbox = document.getElementById('slideshow-from-current');
+                
+                repeatCheckbox.parentElement.innerHTML = `<input type="checkbox" id="slideshow-repeat"> ${t.slideshowRepeat}`;
+                fromCurrentCheckbox.parentElement.innerHTML = `<input type="checkbox" id="slideshow-from-current"> ${t.slideshowStartFromCurrent}`;
+                
+                // Восстанавливаем состояние чекбоксов
                 document.getElementById('slideshow-repeat').checked = this.slideshowRepeat;
                 document.getElementById('slideshow-from-current').checked = this.slideshowFromCurrent;
-                // Восстанавливаем обработчики
+                
+                // Кнопки слайдшоу
+                document.getElementById('slideshow-settings-close').textContent = t.close;
+                document.getElementById('slideshow-start-stop').textContent = this.isSlideshowActive ? t.slideshowStop : t.slideshowStart;
+                
+                // Восстанавливаем обработчики событий для чекбоксов
                 document.getElementById('slideshow-repeat').addEventListener('change', () => {
                     this.slideshowRepeat = document.getElementById('slideshow-repeat').checked;
                     this.saveSlideshowSettings();
                 });
+                
                 document.getElementById('slideshow-from-current').addEventListener('change', () => {
                     this.slideshowFromCurrent = document.getElementById('slideshow-from-current').checked;
                     this.saveSlideshowSettings();
                 });
-                document.getElementById('slideshow-settings-close').textContent = t.close;
-                // Кнопка старт/стоп слайдшоу
-                if (this.isSlideshowActive) {
-                    this.slideshowStartStopBtn.textContent = t.slideshowStop;
-                    this.slideshowBtn.querySelector('.btn-text').textContent = t.slideshowStop;
-                } else {
-                    this.slideshowStartStopBtn.textContent = t.slideshowStart;
-                    this.slideshowBtn.querySelector('.btn-text').textContent = t.slideshow;
-                }
             }
         }
 
