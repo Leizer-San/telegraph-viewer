@@ -637,6 +637,33 @@
             width: 100%;
             display: block;
         }
+
+        /* Яркие слайдеры и чекбоксы */
+        input[type="range"] {
+            accent-color: #007acc;
+            background: transparent;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            background: #007acc;
+            border: 2px solid #fff;
+        }
+        input[type="range"]:focus {
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #444;
+        }
+        input[type="range"]::-ms-fill-lower {
+            background: #007acc;
+        }
+        input[type="range"]::-ms-fill-upper {
+            background: #444;
+        }
+        input[type="checkbox"] {
+            accent-color: #007acc;
+            width: 18px;
+            height: 18px;
+        }
     </style>
 </head>
 <body>
