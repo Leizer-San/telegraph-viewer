@@ -684,6 +684,10 @@
         <div class="loading-screen" id="loading-screen">
             <h1>LeizerGraph</h1>
             <div class="input-section">
+                <div class="telegram-channels" style="margin-bottom: 20px; text-align: center;">
+                    <h3 style="color: #fff; margin-bottom: 10px;">Мои хентай телеграм каналы</h3>
+                    <a href="https://t.me/addlist/dHQGpMv0wdE1ZGFi" target="_blank" style="display: inline-block; padding: 10px 20px; background: #0088cc; color: white; text-decoration: none; border-radius: 5px; transition: background 0.3s ease;">Подписаться на каналы</a>
+                </div>
                 <div class="input-group">
                     <label for="telegraph-url">Telegraph URL</label>
                     <input type="text" id="telegraph-url" class="input-field" placeholder="https://telegra.ph/example или просто example">
@@ -883,6 +887,8 @@
                         slideshowRepeat: 'Повторять',
                         slideshowInterval: 'Интервал (сек):',
                         slideshowSettings: 'Настройки слайдшоу',
+                        telegramChannels: 'Мои хентай телеграм каналы',
+                        subscribeToChannels: 'Подписаться на каналы',
                     },
                     en: {
                         title: 'LeizerGraph',
@@ -935,6 +941,8 @@
                         slideshowRepeat: 'Repeat',
                         slideshowInterval: 'Interval (sec):',
                         slideshowSettings: 'Slideshow Settings',
+                        telegramChannels: 'My Hentai Telegram Channels',
+                        subscribeToChannels: 'Subscribe to Channels',
                     }
                 };
                 
@@ -1149,6 +1157,10 @@
                         const title = article.querySelector("h1");
                         if (title) {
                             this.mangaTitle = title.textContent.trim();
+                            // Обновляем заголовок страницы
+                            document.title = this.mangaTitle;
+                            // Обновляем мета-теги
+                            document.querySelector('meta[property="og:title"]').setAttribute('content', this.mangaTitle);
                         } else {
                             this.mangaTitle = slug;
                         }
@@ -2082,6 +2094,13 @@
                     this.slideshowFromCurrent = document.getElementById('slideshow-from-current').checked;
                     this.saveSlideshowSettings();
                 });
+                
+                // Update Telegram channels section
+                const telegramChannelsSection = document.querySelector('.telegram-channels');
+                if (telegramChannelsSection) {
+                    telegramChannelsSection.querySelector('h3').textContent = t.telegramChannels;
+                    telegramChannelsSection.querySelector('a').textContent = t.subscribeToChannels;
+                }
             }
         }
 
