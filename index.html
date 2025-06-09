@@ -301,8 +301,9 @@
             color: #ccc;
         }
 
-        .page-slider {
-            width: 200px;
+        /* Стили для всех слайдеров */
+        .width-slider, .page-slider, #slideshow-interval {
+            width: 100%;
             height: 6px;
             background: #333;
             border-radius: 3px;
@@ -310,9 +311,9 @@
             cursor: pointer;
             -webkit-appearance: none;
             appearance: none;
+            position: relative;
         }
-
-        .page-slider::-webkit-slider-thumb {
+        .width-slider::-webkit-slider-thumb, .page-slider::-webkit-slider-thumb, #slideshow-interval::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
             width: 18px;
@@ -321,30 +322,68 @@
             border-radius: 50%;
             cursor: pointer;
             border: none;
+            position: relative;
+            z-index: 2;
         }
-
-        .page-slider::-moz-range-thumb {
+        .width-slider::-moz-range-thumb, .page-slider::-moz-range-thumb, #slideshow-interval::-moz-range-thumb {
             width: 18px;
             height: 18px;
             background: #007acc;
             border-radius: 50%;
             cursor: pointer;
             border: none;
+            position: relative;
+            z-index: 2;
         }
-
-        .page-slider:disabled {
+        .width-slider:disabled, .page-slider:disabled, #slideshow-interval:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-
-        .page-slider:disabled::-webkit-slider-thumb {
+        .width-slider:disabled::-webkit-slider-thumb, .page-slider:disabled::-webkit-slider-thumb, #slideshow-interval:disabled::-webkit-slider-thumb {
             background: #555;
             cursor: not-allowed;
         }
-
-        .page-slider:disabled::-moz-range-thumb {
+        .width-slider:disabled::-moz-range-thumb, .page-slider:disabled::-moz-range-thumb, #slideshow-interval:disabled::-moz-range-thumb {
             background: #555;
             cursor: not-allowed;
+        }
+        /* Цветное заполнение для Webkit */
+        .width-slider::-webkit-slider-runnable-track,
+        .page-slider::-webkit-slider-runnable-track,
+        #slideshow-interval::-webkit-slider-runnable-track {
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to right, #007acc 0% var(--progress, 0%), #333 var(--progress, 0%) 100%);
+        }
+        /* Цветное заполнение для Firefox */
+        .width-slider::-moz-range-progress,
+        .page-slider::-moz-range-progress,
+        #slideshow-interval::-moz-range-progress {
+            background-color: #007acc;
+            height: 6px;
+            border-radius: 3px;
+        }
+        .width-slider::-moz-range-track,
+        .page-slider::-moz-range-track,
+        #slideshow-interval::-moz-range-track {
+            background: #333;
+            height: 6px;
+            border-radius: 3px;
+        }
+        /* Для IE/Edge */
+        .width-slider::-ms-fill-lower,
+        .page-slider::-ms-fill-lower,
+        #slideshow-interval::-ms-fill-lower {
+            background: #007acc;
+        }
+        .width-slider::-ms-fill-upper,
+        .page-slider::-ms-fill-upper,
+        #slideshow-interval::-ms-fill-upper {
+            background: #333;
+        }
+        /* Для корректного отображения на всех браузерах */
+        .width-slider, .page-slider, #slideshow-interval {
+            background: transparent;
         }
 
         .control-buttons {
@@ -431,17 +470,6 @@
         }
 
         /* Width slider styles */
-        .width-slider {
-            width: 100%;
-            height: 6px;
-            background: #333;
-            border-radius: 3px;
-            outline: none;
-            cursor: pointer;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
         .width-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -2241,6 +2269,27 @@
             }
             return url;
         }
+
+        // Устанавливаем прогресс для цветного заполнения слайдеров
+        function setSliderProgress(slider) {
+            const min = slider.min ? Number(slider.min) : 0;
+            const max = slider.max ? Number(slider.max) : 100;
+            const val = Number(slider.value);
+            const percent = ((val - min) / (max - min)) * 100;
+            slider.style.setProperty('--progress', percent + '%');
+        }
+
+        // Для всех слайдеров при загрузке и изменении
+        function updateAllSlidersProgress() {
+            document.querySelectorAll('.width-slider, .page-slider, #slideshow-interval').forEach(setSliderProgress);
+        }
+        document.addEventListener('input', (e) => {
+            if (e.target.matches('.width-slider, .page-slider, #slideshow-interval')) {
+                setSliderProgress(e.target);
+            }
+        });
+        document.addEventListener('DOMContentLoaded', updateAllSlidersProgress);
+        window.addEventListener('DOMContentLoaded', updateAllSlidersProgress);
     </script>
 </body>
 </html>
