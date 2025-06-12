@@ -1471,6 +1471,14 @@
                 this.showInterface();
                 // Скрываем через 2 секунды
                 setTimeout(() => this.hideInterface(), 2000);
+
+                const savedImages = localStorage.getItem('mangaReaderImages');
+                if (savedImages) {
+                    this.images = JSON.parse(savedImages);
+                    if (this.images.length > 0) {
+                        this.startReading();
+                    }
+                }
             }
 
             updateLocalization() {
@@ -2338,7 +2346,7 @@
                 } else {
                     this.singlePageMode.style.display = 'flex';
                     this.continuousMode.style.display = 'none';
-                    this.showPage(this.currentPage); // <--- добавить эту строку
+                    this.showPage(this.currentPage);
                 }
                 
                 if (!this.clickNav) {
@@ -3164,7 +3172,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             window.cookieConsent = new CookieConsent();
         });
+
+        // После загрузки изображений:
+        localStorage.setItem('mangaReaderImages', JSON.stringify(this.images));
     </script>
 </body>
-</html>
 </html>
