@@ -1832,32 +1832,32 @@
                 const newSrc = this.images[index];
                 const img = this.currentImage;
 
-                if (img.src !== newSrc) {
-                    img.style.opacity = '0';
-                    let fallbackTimeout = setTimeout(() => {
-                        img.style.opacity = '1';
-                        this.updateImageWidths();
-                    }, 1000);
+                // Сброс обработчиков и opacity
+                img.onload = null;
+                img.onerror = null;
+                img.style.opacity = '0';
 
-                    img.onload = () => {
-                        clearTimeout(fallbackTimeout);
-                        img.style.opacity = '1';
-                        this.updateImageWidths();
-                    };
-                    img.onerror = () => {
-                        clearTimeout(fallbackTimeout);
-                        img.style.opacity = '1';
-                        this.updateImageWidths();
-                    };
-                    img.src = newSrc;
+                let fallbackTimeout = setTimeout(() => {
+                    img.style.opacity = '1';
+                    this.updateImageWidths();
+                }, 1000);
 
-                    // Если уже загружено (кэш), onload не сработает — выставляем opacity вручную
-                    if (img.complete) {
-                        clearTimeout(fallbackTimeout);
-                        img.style.opacity = '1';
-                        this.updateImageWidths();
-                    }
-                } else {
+                img.onload = () => {
+                    clearTimeout(fallbackTimeout);
+                    img.style.opacity = '1';
+                    this.updateImageWidths();
+                };
+                img.onerror = () => {
+                    clearTimeout(fallbackTimeout);
+                    img.style.opacity = '1';
+                    this.updateImageWidths();
+                };
+
+                img.src = newSrc;
+
+                // Если уже загружено и успешно (кэш), показываем сразу
+                if (img.complete && img.naturalWidth > 0) {
+                    clearTimeout(fallbackTimeout);
                     img.style.opacity = '1';
                     this.updateImageWidths();
                 }
