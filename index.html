@@ -1827,35 +1827,38 @@
 
             showPage(index) {
                 if (index < 0 || index >= this.images.length) return;
-                
+
                 this.currentPage = index;
-                
-                this.currentImage.onload = () => {
-                    this.currentImage.style.opacity = '1';
-                    this.updateImageWidths();
-                };
-                
-                this.currentImage.onerror = () => {
-                    console.error(this.translations[this.currentLanguage].imageLoadError, this.images[index]);
-                    this.currentImage.style.opacity = '1';
-                    if (index < this.images.length - 1) {
-                        this.nextPage();
-                    }
-                };
-                
-                // Smooth transition without flicker
-                this.currentImage.style.opacity = '0';
-                this.currentImage.src = this.images[index];
-                
-                // If the image is already cached and complete, onload may not fire
-                if (this.currentImage.complete) {
-                    this.currentImage.style.opacity = '1';
+
+                // Только если src реально меняется — делаем плавное появление
+                const newSrc = this.images[index];
+                const img = this.currentImage;
+                if (img.src !== newSrc) {
+                    img.style.opacity = '0';
+                    img.onload = () => {
+                        img.style.opacity = '1';
+                        this.updateImageWidths();
+                    };
+                    img.onerror = () => {
+                        img.style.opacity = '1';
+                        this.updateImageWidths();
+                    };
+                    img.src = newSrc;
+                } else {
+                    // Если src не меняется — сразу показываем
+                    img.style.opacity = '1';
                     this.updateImageWidths();
                 }
-                
+
+                // Если уже загружено (кэш), onload не сработает — выставляем opacity вручную
+                if (img.complete) {
+                    img.style.opacity = '1';
+                    this.updateImageWidths();
+                }
+
                 this.updatePageInfo();
                 this.updateProgress();
-                
+
                 if (this.isContinuousMode) {
                     this.updateContinuousMode();
                 }
