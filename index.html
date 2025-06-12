@@ -1847,53 +1847,12 @@
 
             showPage(index) {
                 if (index < 0 || index >= this.images.length) return;
-
                 this.currentPage = index;
                 const newSrc = this.images[index];
                 const img = this.currentImage;
-
-                // Если src не меняется — не трогаем opacity!
-                if (img.src === newSrc) {
-                    img.style.opacity = '1';
-                    this.updateImageWidths();
-                    this.updatePageInfo();
-                    this.updateProgress();
-                    if (this.isContinuousMode) this.updateContinuousMode();
-                    return;
-                }
-
-                // Сброс обработчиков и opacity
-                img.onload = null;
-                img.onerror = null;
-                img.style.opacity = '0';
-
-                let fallbackTimeout = setTimeout(() => {
-                    img.style.opacity = '1';
-                    this.updateImageWidths();
-                }, 1000);
-
-                img.onload = () => {
-                    clearTimeout(fallbackTimeout);
-                    img.style.opacity = '1';
-                    this.updateImageWidths();
-                };
-                img.onerror = () => {
-                    clearTimeout(fallbackTimeout);
-                    img.style.opacity = '1';
-                    this.updateImageWidths();
-                };
-
+                // Просто меняем src без эффектов
                 img.src = newSrc;
-
-                // Проверяем complete/naturalWidth чуть позже, чтобы браузер успел обновить их
-                setTimeout(() => {
-                    if (img.complete && img.naturalWidth > 0) {
-                        clearTimeout(fallbackTimeout);
-                        img.style.opacity = '1';
-                        this.updateImageWidths();
-                    }
-                }, 0);
-
+                this.updateImageWidths();
                 this.updatePageInfo();
                 this.updateProgress();
                 if (this.isContinuousMode) this.updateContinuousMode();
