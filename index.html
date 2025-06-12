@@ -1471,14 +1471,10 @@
                 this.showInterface();
                 // Скрываем через 2 секунды
                 setTimeout(() => this.hideInterface(), 2000);
-
-                // Восстанавливаем изображения из localStorage, если есть
-                const savedImages = localStorage.getItem('mangaReaderImages');
-                if (savedImages) {
-                    this.images = JSON.parse(savedImages);
-                    if (this.images.length > 0) {
-                        this.startReading();
-                    }
+                // Если изображения уже есть (например, после загрузки Telegraph или файлов), показываем первое изображение и начинаем последовательную прогрузку
+                if (this.images && this.images.length > 0) {
+                    this.showPage(0);
+                    this.preloadAllImagesSequentially(1);
                 }
             }
 
@@ -1838,7 +1834,8 @@
                 
                 this.updatePageInfo();
                 this.showPage(0);
-                this.preloadImages();
+                // Сразу после первого изображения начинаем последовательную прогрузку остальных
+                this.preloadAllImagesSequentially(1);
                 
                 // Показываем интерфейс при старте
                 this.showInterface();
@@ -1964,12 +1961,12 @@
                 // затем запускаем фоновую цепочку
                 if (!this.sequentialPreloadingStarted) {
                     this.sequentialPreloadingStarted = true;
-                    this.preloadAllImagesSequentially();
+                    this.preloadAllImagesSequentially(1);
                 }
             }
 
             // Новая функция: последовательная прогрузка всех изображений
-            preloadAllImagesSequentially(index = 0) {
+            preloadAllImagesSequentially(index = 1) {
                 if (index >= this.images.length) return; // done
                 const img = new Image();
                 img.onload = img.onerror = () => {
