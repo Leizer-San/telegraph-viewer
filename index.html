@@ -1472,6 +1472,7 @@
                 // Скрываем через 2 секунды
                 setTimeout(() => this.hideInterface(), 2000);
 
+                // Восстанавливаем изображения из localStorage, если есть
                 const savedImages = localStorage.getItem('mangaReaderImages');
                 if (savedImages) {
                     this.images = JSON.parse(savedImages);
@@ -1757,6 +1758,8 @@
 
                         const images = article.querySelectorAll("img");
                         this.images = Array.from(images).map(img => img.src);
+                        // Сохраняем изображения
+                        localStorage.setItem('mangaReaderImages', JSON.stringify(this.images));
                     }
                 } catch (error) {
                     console.error(this.translations[this.currentLanguage].telegraphLoadError, error);
@@ -1777,6 +1780,8 @@
                 }
                 // Устанавливаем название по умолчанию для загруженных файлов
                 this.mangaTitle = 'uploaded_images';
+                // Сохраняем изображения
+                localStorage.setItem('mangaReaderImages', JSON.stringify(this.images));
             }
 
             async loadZipFile(file) {
@@ -1801,6 +1806,8 @@
                         const url = URL.createObjectURL(blob);
                         this.images.push(url);
                     }
+                    // Сохраняем изображения
+                    localStorage.setItem('mangaReaderImages', JSON.stringify(this.images));
                 } catch (error) {
                     console.error(this.translations[this.currentLanguage].zipLoadError, error);
                     alert(this.translations[this.currentLanguage].zipError);
@@ -1811,6 +1818,12 @@
                 this.loadSettings(); // <-- добавлено для применения актуальных настроек
                 this.loadingScreen.style.display = 'none';
                 this.readerInterface.style.display = 'block';
+                
+                // Показываем singlePageMode, если горизонтальный режим
+                if (!this.isContinuousMode) {
+                    this.singlePageMode.style.display = 'flex';
+                    this.currentImage.style.display = '';
+                }
                 
                 // Apply bottom panel visibility setting
                 if (this.hideBottomPanel) {
@@ -3172,9 +3185,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             window.cookieConsent = new CookieConsent();
         });
-
-        // После загрузки изображений:
-        localStorage.setItem('mangaReaderImages', JSON.stringify(this.images));
     </script>
 </body>
 </html>
