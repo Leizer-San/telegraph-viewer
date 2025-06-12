@@ -1832,6 +1832,16 @@
                 const newSrc = this.images[index];
                 const img = this.currentImage;
 
+                // Если src не меняется — не трогаем opacity!
+                if (img.src === newSrc) {
+                    img.style.opacity = '1';
+                    this.updateImageWidths();
+                    this.updatePageInfo();
+                    this.updateProgress();
+                    if (this.isContinuousMode) this.updateContinuousMode();
+                    return;
+                }
+
                 // Сброс обработчиков и opacity
                 img.onload = null;
                 img.onerror = null;
@@ -1855,19 +1865,18 @@
 
                 img.src = newSrc;
 
-                // Если уже загружено и успешно (кэш), показываем сразу
-                if (img.complete && img.naturalWidth > 0) {
-                    clearTimeout(fallbackTimeout);
-                    img.style.opacity = '1';
-                    this.updateImageWidths();
-                }
+                // Проверяем complete/naturalWidth чуть позже, чтобы браузер успел обновить их
+                setTimeout(() => {
+                    if (img.complete && img.naturalWidth > 0) {
+                        clearTimeout(fallbackTimeout);
+                        img.style.opacity = '1';
+                        this.updateImageWidths();
+                    }
+                }, 0);
 
                 this.updatePageInfo();
                 this.updateProgress();
-
-                if (this.isContinuousMode) {
-                    this.updateContinuousMode();
-                }
+                if (this.isContinuousMode) this.updateContinuousMode();
             }
 
             updateContinuousMode() {
