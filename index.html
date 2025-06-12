@@ -1829,29 +1829,35 @@
                 if (index < 0 || index >= this.images.length) return;
 
                 this.currentPage = index;
-
-                // Только если src реально меняется — делаем плавное появление
                 const newSrc = this.images[index];
                 const img = this.currentImage;
+
                 if (img.src !== newSrc) {
                     img.style.opacity = '0';
+                    let fallbackTimeout = setTimeout(() => {
+                        img.style.opacity = '1';
+                        this.updateImageWidths();
+                    }, 1000);
+
                     img.onload = () => {
+                        clearTimeout(fallbackTimeout);
                         img.style.opacity = '1';
                         this.updateImageWidths();
                     };
                     img.onerror = () => {
+                        clearTimeout(fallbackTimeout);
                         img.style.opacity = '1';
                         this.updateImageWidths();
                     };
                     img.src = newSrc;
-                } else {
-                    // Если src не меняется — сразу показываем
-                    img.style.opacity = '1';
-                    this.updateImageWidths();
-                }
 
-                // Если уже загружено (кэш), onload не сработает — выставляем opacity вручную
-                if (img.complete) {
+                    // Если уже загружено (кэш), onload не сработает — выставляем opacity вручную
+                    if (img.complete) {
+                        clearTimeout(fallbackTimeout);
+                        img.style.opacity = '1';
+                        this.updateImageWidths();
+                    }
+                } else {
                     img.style.opacity = '1';
                     this.updateImageWidths();
                 }
