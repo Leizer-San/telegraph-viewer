@@ -2338,6 +2338,7 @@
                 } else {
                     this.singlePageMode.style.display = 'flex';
                     this.continuousMode.style.display = 'none';
+                    this.showPage(this.currentPage); // <--- добавить эту строку
                 }
                 
                 if (!this.clickNav) {
