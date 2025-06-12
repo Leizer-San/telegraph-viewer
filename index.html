@@ -1650,6 +1650,8 @@
                 // Image click navigation
                 this.currentImage.addEventListener('click', (e) => {
                     if (!this.clickNav) return;
+                    // Если touchArea === 'fullscreen', обработку клика делает глобальный обработчик
+                    if (this.touchArea === 'fullscreen') return;
                     this.handleImageClick(e);
                 });
 
